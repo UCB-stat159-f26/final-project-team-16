@@ -1,0 +1,56 @@
+# Files that git does not track in this repository.
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Editors
+*.swp
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+.virtual_documents/
+
+# R and RStudio
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# MyST website build
+_build/
+node_modules/
+
+# Local Python environment
+.venv/
+
+# Raw downloads that are too large for the repository
+data/downloads/
+
+# Repository root: only the listed Markdown files and hidden files are tracked.
+# To track a new one, add a line that starts with "!" below.
+/*.md
+!/README.md
+!/CONTRIBUTING.md
+!/index.md
+!/instructions.md
+/.*
+!/.gitignore
+!/.gitattributes
+!/.editorconfig
+!/.github/
