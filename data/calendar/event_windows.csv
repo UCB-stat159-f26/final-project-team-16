@@ -1,0 +1,20 @@
+event_type,event_name,start_date,end_date,source_url
+move_in,New student move-in,2024-08-20,2024-08-21,https://internationaloffice.berkeley.edu/sites/default/files/bio_parent_and_family_calendar_2024-2025.pdf
+semester,Fall 2024 semester,2024-08-21,2024-12-20,https://registrar.berkeley.edu/wp-content/uploads/UCB_AcademicCalendar_2024-25-NEW.pdf
+instruction_begins,Instruction begins,2024-08-28,2024-08-28,https://registrar.berkeley.edu/wp-content/uploads/UCB_AcademicCalendar_2024-25-NEW.pdf
+home_football,Cal vs. UC Davis,2024-08-31,2024-08-31,https://calbears.com/sports/football/schedule/2024
+holiday,Labor Day,2024-09-02,2024-09-02,https://registrar.berkeley.edu/wp-content/uploads/UCB_AcademicCalendar_2024-25-NEW.pdf
+home_football,Cal vs. San Diego State,2024-09-14,2024-09-14,https://calbears.com/sports/football/schedule/2024
+home_football,Cal vs. Miami,2024-10-05,2024-10-05,https://calbears.com/sports/football/schedule/2024
+home_football,Cal vs. NC State,2024-10-19,2024-10-19,https://calbears.com/sports/football/schedule/2024
+home_football,Cal vs. Oregon State,2024-10-26,2024-10-26,https://calbears.com/sports/football/schedule/2024
+halloween,Halloween,2024-10-31,2024-10-31,
+holiday,Veterans Day,2024-11-11,2024-11-11,https://registrar.berkeley.edu/wp-content/uploads/UCB_AcademicCalendar_2024-25-NEW.pdf
+home_football,Cal vs. Syracuse,2024-11-16,2024-11-16,https://calbears.com/sports/football/schedule/2024
+home_football,Cal vs. Stanford,2024-11-23,2024-11-23,https://calbears.com/sports/football/schedule/2024
+non_instructional,Day before Thanksgiving,2024-11-27,2024-11-27,https://registrar.berkeley.edu/wp-content/uploads/UCB_AcademicCalendar_2024-25-NEW.pdf
+holiday,Thanksgiving holidays,2024-11-28,2024-11-29,https://registrar.berkeley.edu/wp-content/uploads/UCB_AcademicCalendar_2024-25-NEW.pdf
+formal_classes_end,Formal classes end,2024-12-06,2024-12-06,https://registrar.berkeley.edu/wp-content/uploads/UCB_AcademicCalendar_2024-25-NEW.pdf
+rrr,"Reading, Review, and Recitation Week",2024-12-09,2024-12-13,https://registrar.berkeley.edu/wp-content/uploads/UCB_AcademicCalendar_2024-25-NEW.pdf
+last_instruction_day,Last day of instruction,2024-12-13,2024-12-13,https://registrar.berkeley.edu/wp-content/uploads/UCB_AcademicCalendar_2024-25-NEW.pdf
+finals,Fall final examinations,2024-12-16,2024-12-20,https://registrar.berkeley.edu/wp-content/uploads/UCB_AcademicCalendar_2024-25-NEW.pdf
