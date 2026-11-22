@@ -1,0 +1,28 @@
+# Editor settings shared by the team. See https://editorconfig.org.
+root = true
+
+# Every text file: UTF-8, Unix line endings, and one newline at the end.
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# make needs tabs in recipes.
+[Makefile]
+indent_style = tab
+
+# Configuration files use two spaces.
+[*.{yml,yaml,toml,json}]
+indent_size = 2
+
+# Two spaces at the end of a Markdown line mean a line break.
+[*.md]
+trim_trailing_whitespace = false
+
+# Jupyter writes notebooks in its own format.
+[*.ipynb]
+indent_size = 1
+trim_trailing_whitespace = false
