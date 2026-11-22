@@ -5,3 +5,7 @@
 *.png binary
 *.gz binary
 *.pdf binary
+
+# Data tables keep the bytes of their source, so that a checksum of a
+# data file gives the same value on every system.
+data/**/*.csv -text
