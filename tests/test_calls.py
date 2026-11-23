@@ -3,7 +3,7 @@
 import pandas as pd
 import pytest
 
-from bpdtools.calls import local_dates
+from bpdtools.calls import covered_days, local_dates
 
 
 def test_local_dates_reads_summer_and_winter_offsets():
@@ -66,3 +66,40 @@ def test_local_dates_rejects_a_value_without_offset():
     timestamps = pd.Series(["2024-05-01 10:00:00-07:00", "2024-05-01 10:00:00"])
     with pytest.raises(ValueError, match="no UTC offset"):
         local_dates(timestamps)
+
+
+def test_covered_days_keeps_a_day_without_noise_calls():
+    """Check that a day with records but no noise call is still covered."""
+    # Day 2 has a battery call but no noise call; the last row is undated.
+    calls = pd.DataFrame(
+        {
+            "Call Type": [
+                "CFS 415E - Noise Disturbance",
+                "CFS 242 - Battery",
+                "CFS LDRPT - Loud Report",
+                "CFS 415E - Noise Disturbance",
+            ],
+            "date": pd.to_datetime(["2024-09-01", "2024-09-02", "2024-09-03", None]),
+        }
+    )
+    result = covered_days(calls["date"])
+    expected = pd.DatetimeIndex(["2024-09-01", "2024-09-02", "2024-09-03"])
+    assert result.tolist() == expected.tolist()
+    # A series filtered to noise calls would wrongly drop day 2.
+    is_battery = calls["Call Type"] == "CFS 242 - Battery"
+    assert len(covered_days(calls.loc[~is_battery, "date"])) == 2
+
+
+def test_covered_days_sorts_and_lists_each_day_once():
+    """Check that repeated, unsorted dates give each day once, in order."""
+    # 2024-09-03 occurs twice and comes before 2024-09-01.
+    dates = pd.Series(pd.to_datetime(["2024-09-03", "2024-09-01", "2024-09-03"]))
+    result = covered_days(dates)
+    assert result.tolist() == [pd.Timestamp("2024-09-01"), pd.Timestamp("2024-09-03")]
+
+
+def test_covered_days_rejects_text_dates():
+    """Check that dates stored as text raise a TypeError."""
+    # Text dates must be parsed first, so the function refuses them.
+    with pytest.raises(TypeError, match="datetime64"):
+        covered_days(pd.Series(["2024-09-01"]))
