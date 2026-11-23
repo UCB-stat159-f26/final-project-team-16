@@ -1,0 +1,25 @@
+# Package settings for bpdtools, and settings for pytest.
+
+# Build the package with setuptools.
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+# Name and version of the project's own package.
+[project]
+name = "bpdtools"
+version = "0.1.0"
+description = "Functions for the analysis of Berkeley Police Department open data"
+requires-python = ">=3.11"
+
+# Only the bpdtools folder is part of the package.
+[tool.setuptools]
+packages = ["bpdtools"]
+
+# Settings for pytest.
+[tool.pytest.ini_options]
+# Put the repository root on the import path, so that the tests import
+# bpdtools from this folder even when the package is not installed.
+pythonpath = ["."]
+# Treat every warning as an error, so that a warning cannot pass unnoticed.
+filterwarnings = ["error"]
