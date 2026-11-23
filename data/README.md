@@ -41,3 +41,20 @@ Vehicle stops retain latitude and longitude in degrees. Collisions have an accid
 
 - `collision_data.csv` — `721eb3da422811cbbf48465adedccf2b07dd5660bf419191a3414492674043e5`
 - `stop_data.csv` — `52eecf738f2021dc2fd165903db691d48a6bac17b25dfa45b7a37e0ba95938b3`
+
+### Interpreting two abbreviated DUI labels
+
+The primary A4 flag follows the wording of the recorded PCF description.
+Two abbreviations warrant a sensitivity check. Of 19 passenger-for-hire
+records labeled VC 23152(e), 17 predate July 1, 2018, one is undated, and
+one is dated January 4, 2019. The passenger-for-hire BAC provision became
+operative on July 1, 2018. The other abbreviated label, VC 23153(g), occurs
+once on April 16, 2019 and refers to combined alcohol and drug impairment.
+
+Both labels remain unclear under the primary text-only definition. Counting
+the two 2019 records supported by the dated subsections would give 959
+rather than 957 flags across the snapshot. Neither addition falls in Fall
+2024. A PCF flag describes police coding, not a measured BAC.
+
+Sources: [California AB 2687, chaptered text](https://www.leginfo.ca.gov/pub/15-16/bill/asm/ab_2651-2700/ab_2687_bill_20160928_chaptered.pdf)
+and [CHP subsection history](https://www.chp.ca.gov/siteassets/files/idtf-trd-12-11-2019-dui-subsection-changes-history.pdf).
