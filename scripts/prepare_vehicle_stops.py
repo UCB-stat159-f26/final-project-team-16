@@ -10,7 +10,7 @@ FIELDS = ("LEA_Record_ID", "TypeOfStopDesc", "StopDate", "StopTime", "Latitude",
 
 
 def vehicle_stops(rows):
-    """Return vehicle events keyed by ID from an iterable of BPD row dictionaries.
+    """Accept an iterable of CSV row dictionaries and return a dict keyed by stop ID.
 
     Each value is a dictionary of event fields. Missing IDs or conflicting
     event fields within an ID raise ValueError. Missing coordinates are kept.
@@ -25,11 +25,12 @@ def vehicle_stops(rows):
         if key in events and events[key] != record:
             raise ValueError(f"Inconsistent event fields for stop ID {key}")
         events[key] = record
+    # Filter after validation so conflicting stop types within an ID surface.
     return {k: v for k, v in events.items() if v["TypeOfStopDesc"] == "Vehicular Stop"}
 
 
 def main():
-    """Read the raw CSV and write data/processed/vehicle_stops.csv."""
+    """Take no arguments, write the vehicle-stop CSV, and return None."""
     with Path("data/raw/stop_data.csv").open(encoding="utf-8-sig", newline="") as source:
         events = vehicle_stops(csv.DictReader(source))
     output = Path("data/processed/vehicle_stops.csv")
