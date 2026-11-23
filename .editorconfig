@@ -26,3 +26,11 @@ trim_trailing_whitespace = false
 [*.ipynb]
 indent_size = 1
 trim_trailing_whitespace = false
+
+# Data tables keep the bytes of their source, so an editor must not change
+# their encoding, their line endings, or their trailing spaces.
+[data/**.csv]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = false
