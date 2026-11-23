@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 def daily_flags(windows):
-    """Yield date and integer indicator dictionaries from CSV window dictionaries.
+    """Accept an iterable of CSV row dictionaries and yield one dict per day.
 
     Include every day from the first window start to the last window end.
     Each event type has an independent flag, including both endpoints.
@@ -15,8 +15,11 @@ def daily_flags(windows):
     if not intervals or any(end < start for _, start, end in intervals):
         raise ValueError("Expected nonempty windows with start <= end")
     kinds = sorted({kind for kind, _, _ in intervals})
+    if "date" in kinds:
+        raise ValueError("Event type date is reserved for the calendar date column")
     day = min(start for _, start, _ in intervals)
     last = max(end for _, _, end in intervals)
+    # Keep independent flags so overlapping events survive the expansion.
     while day <= last:
         active = {kind for kind, start, end in intervals if start <= day <= end}
         yield {"date": day.isoformat(), **{k: int(k in active) for k in kinds}}
@@ -24,7 +27,7 @@ def daily_flags(windows):
 
 
 def main():
-    """Read event_windows.csv and write daily_calendar.csv beside it."""
+    """Take no arguments, write the daily calendar beside its source, and return None."""
     folder = Path(__file__).resolve().parents[1] / "data/calendar"
     with (folder / "event_windows.csv").open(newline="", encoding="utf-8") as src:
         rows = list(daily_flags(csv.DictReader(src)))
