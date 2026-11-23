@@ -4,7 +4,7 @@
 # defined in one place only.
 ENV_NAME := $(shell sed -n 's/^name:[[:space:]]*\([^[:space:]]*\).*/\1/p' environment.yml)
 
-.PHONY: help env
+.PHONY: help env test
 
 ## help: list the targets of this Makefile
 help:
@@ -13,3 +13,9 @@ help:
 ## env: create the conda environment, or update it when it exists
 env:
 	conda env update --name $(ENV_NAME) --file environment.yml --prune
+
+# Run pytest inside the environment without activating it. pytest reads its
+# settings from pyproject.toml.
+## test: run the unit tests in tests/
+test:
+	conda run --no-capture-output --name $(ENV_NAME) python -m pytest
