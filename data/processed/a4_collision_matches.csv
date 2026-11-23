@@ -1,4 +1,4 @@
-event,event_date,control_dates,n_controls,event_collisions,mean_control_collisions
+event,event_date,control_dates,n_controls,event_alcohol_collisions,mean_control_alcohol_collisions
 home_football,2024-08-31,2024-08-24,1,0,0.0
 home_football,2024-09-14,"2024-09-07, 2024-09-21, 2024-09-28",3,0,0.3333333333333333
 home_football,2024-10-05,2024-10-12,1,0,0.0
