@@ -1,0 +1,27 @@
+# Conda environment for the analysis, the tests, and the website.
+# Create it with `conda env create --file environment.yml`, or update it
+# after this file changes with `conda env update --file environment.yml --prune`.
+# Versions are pinned to MAJOR.MINOR so that conda can still pick the
+# right build for each operating system.
+name: bpd-rhythm
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.12
+  # Analysis
+  - numpy=2.5
+  - pandas=3.1
+  - matplotlib=3.11
+  - scipy=1.18
+  # Time zone data, so that America/Los_Angeles works on every operating system
+  - tzdata
+  # Notebooks
+  - jupyterlab=4.6
+  - nbconvert=7.17
+  - ipykernel=7.4
+  # Tests and code checks
+  - pytest=9.2
+  - ruff=0.17
+  # Website
+  - mystmd=1.13
