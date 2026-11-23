@@ -1,8 +1,11 @@
-"""Turn Calls for Service timestamps into local dates and list covered days."""
+"""Read raw Calls for Service data, find local dates, and list covered days."""
+
+import os
 
 import pandas as pd
 
 from bpdtools.config import LOCAL_TIME_ZONE
+from bpdtools.paths import repo_path
 
 # Pattern of a UTC offset at the end of a timestamp, for example "-07:00".
 OFFSET_PATTERN = r"[+-]\d{2}:\d{2}$"
@@ -12,6 +15,10 @@ TIMESTAMP_FORMAT = "%Y-%m-%d %H:%M:%S%z"
 
 # How many wrong values to show as examples in an error message.
 N_EXAMPLES = 3
+
+# Name that pandas gives the unnamed first column of the raw CSV, a row
+# index that the publisher saved with the data.
+INDEX_COLUMN = "Unnamed: 0"
 
 
 def local_dates(timestamps):
@@ -103,3 +110,47 @@ def covered_days(dates):
     # once (this is a deduplication of days, not of records).
     days = dates.dropna().dt.normalize().unique()
     return pd.DatetimeIndex(days).sort_values()
+
+
+def read_raw_calls(path, needed_columns):
+    """Read the raw Calls for Service CSV with every column as text.
+
+    Parameters
+    ----------
+    path : pathlib.Path
+        Location of the raw CSV file.
+    needed_columns : list of str
+        Columns that the caller uses. Each one must be in the file.
+
+    Returns
+    -------
+    pandas.DataFrame
+        One row per record, every column as str. Blank cells are empty
+        strings, and the saved row index column is dropped.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the raw file does not exist.
+    ValueError
+        If a column of `needed_columns` is missing from the file.
+    """
+    # Show the path relative to the repository root in error messages.
+    shown_path = os.path.relpath(path, repo_path())
+    # Stop early with a fix when the raw download is not there.
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Raw file not found: {shown_path}. Run "
+            "`python scripts/download_calls.py` from the repository root first."
+        )
+    # Keep each cell as its source text: no type guessing and no "NA" to NaN.
+    raw = pd.read_csv(path, dtype=str, keep_default_na=False, na_filter=False)
+    # Make sure every column that the caller uses is present.
+    missing = [column for column in needed_columns if column not in raw.columns]
+    if missing:
+        raise ValueError(
+            f"Columns {missing} are missing from {shown_path}. Download the file "
+            "again with `python scripts/download_calls.py`."
+        )
+    # The first column is a row index that the publisher saved; it is not data.
+    return raw.drop(columns=[INDEX_COLUMN], errors="ignore")
