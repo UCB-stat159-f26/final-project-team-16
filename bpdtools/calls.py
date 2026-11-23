@@ -1,4 +1,4 @@
-"""Turn Calls for Service timestamps into local dates."""
+"""Turn Calls for Service timestamps into local dates and list covered days."""
 
 import pandas as pd
 
@@ -66,3 +66,40 @@ def local_dates(timestamps):
     # Time zone step: convert each moment to Pacific time with the daylight
     # saving time rules, drop the zone, and keep only the date.
     return moments.dt.tz_convert(LOCAL_TIME_ZONE).dt.tz_localize(None).dt.normalize()
+
+
+def covered_days(dates):
+    """List the local dates on which a table has at least one record.
+
+    Pass the dates of the FULL, unfiltered table (all call types), not a
+    series that was filtered to one event type. A day with records but no
+    event of one type is still a covered day: its count for that type is a
+    real zero, not a gap in the data. A filtered series would drop such days
+    and make daily rates too high.
+
+    Parameters
+    ----------
+    dates : pandas.Series of datetime64
+        Tz-naive local dates of every record of the unfiltered table, for
+        example the result of `local_dates`. NaT values are ignored.
+
+    Returns
+    -------
+    pandas.DatetimeIndex
+        The sorted unique local dates (at midnight) with at least one record.
+
+    Raises
+    ------
+    TypeError
+        If `dates` does not hold tz-naive datetime64 values.
+    """
+    # Accept only tz-naive dates, so that text or UTC values cannot slip in.
+    if not pd.api.types.is_datetime64_dtype(dates):
+        raise TypeError(
+            f"dates has dtype {dates.dtype}; it must be tz-naive datetime64. "
+            "Use local_dates(), or read the table with parse_dates=['date']."
+        )
+    # Drop undated records, reduce each value to its day, and keep each day
+    # once (this is a deduplication of days, not of records).
+    days = dates.dropna().dt.normalize().unique()
+    return pd.DatetimeIndex(days).sort_values()
