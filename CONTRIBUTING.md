@@ -6,7 +6,7 @@ Check open issues and PRs before starting. Claim the issue, identify the researc
 
 ## Work on a branch
 
-Start a task branch from an up-to-date main. Use a descriptive name such as john/academic-calendar. Stage the intended paths and inspect the staged diff before committing. Give each notebook one editor at a time. When two notebooks need the same filtering rule, put it in a documented function both can import.
+Start a task branch from an up-to-date main. Use a type/content branch name such as `analysis/calendar`. Stage the intended paths and inspect the staged diff before committing. Each notebook has one owner. Only the owner edits it. Teammates suggest changes through pull request reviews. When two notebooks need the same filtering rule, put it in a documented function both can import.
 
 ## Document and verify changes
 
