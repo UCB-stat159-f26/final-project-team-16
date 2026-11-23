@@ -3,7 +3,15 @@
 import pandas as pd
 import pytest
 
-from bpdtools.calls import covered_days, local_dates
+from bpdtools.calls import covered_days, local_dates, read_raw_calls
+
+# Header and two rows of a small raw CSV, with the unnamed index column, a
+# blank Source, and the text "NA", which must stay text.
+RAW_TEXT = (
+    ",Incident Number,CreateDatetime,Source\n"
+    "0,2024-00000001,2024-05-01 10:00:00-07:00,NA\n"
+    "1,2024-00000002,2024-05-01 11:00:00-07:00,\n"
+)
 
 
 def test_local_dates_reads_summer_and_winter_offsets():
@@ -103,3 +111,29 @@ def test_covered_days_rejects_text_dates():
     # Text dates must be parsed first, so the function refuses them.
     with pytest.raises(TypeError, match="datetime64"):
         covered_days(pd.Series(["2024-09-01"]))
+
+
+def test_read_raw_calls_keeps_text_and_drops_the_index_column(tmp_path):
+    """Check that cells stay text, blanks stay empty, and the index goes."""
+    # Write the small raw CSV, then read it back.
+    path = tmp_path / "calls.csv"
+    path.write_text(RAW_TEXT)
+    result = read_raw_calls(path, ["Incident Number", "Source"])
+    assert list(result.columns) == ["Incident Number", "CreateDatetime", "Source"]
+    assert result["Source"].tolist() == ["NA", ""]
+
+
+def test_read_raw_calls_rejects_a_missing_column(tmp_path):
+    """Check that a needed column that the file lacks raises a ValueError."""
+    # The small CSV has no Call Type column.
+    path = tmp_path / "calls.csv"
+    path.write_text(RAW_TEXT)
+    with pytest.raises(ValueError, match="Call Type"):
+        read_raw_calls(path, ["Incident Number", "Call Type"])
+
+
+def test_read_raw_calls_rejects_a_missing_file(tmp_path):
+    """Check that a path without a file raises a FileNotFoundError."""
+    # The folder is empty, so the file does not exist.
+    with pytest.raises(FileNotFoundError, match="Raw file not found"):
+        read_raw_calls(tmp_path / "calls.csv", ["Incident Number"])
