@@ -18,6 +18,8 @@ packages = ["bpdtools"]
 
 # Settings for pytest.
 [tool.pytest.ini_options]
+# Look for tests only in the tests folder.
+testpaths = ["tests"]
 # Put the repository root on the import path, so that the tests import
 # bpdtools from this folder even when the package is not installed.
 pythonpath = ["."]
