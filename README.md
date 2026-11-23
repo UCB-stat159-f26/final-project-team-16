@@ -24,3 +24,18 @@ The analysis has four sections. Each section answers a group of related question
 | Academic calendar | Do noise complaints, assaults, and alcohol-related collisions increase during events like home football games, move-in week, Halloween, and finals? |
 | Location | Do areas with more reckless-driving complaints also have more collisions and more traffic stops? |
 | Location | Are noise complaints concentrated in a few blocks, and do the same blocks stay hotspots over time? |
+
+## Getting started
+
+You need conda (for example from [Miniforge](https://github.com/conda-forge/miniforge)), `make`, and `git`. On Windows, use WSL and install Miniforge inside it, because `make` is not part of Windows. If `make` is missing in WSL, install it with `sudo apt install make`.
+
+If a new terminal cannot find `conda`, run `conda init` once with the full path and the name of your shell, then open a new terminal. For example, run `~/miniforge3/bin/conda init zsh` on macOS, or `~/miniforge3/bin/conda init bash` on Linux and WSL.
+
+```bash
+git clone https://github.com/UCB-stat159-f26/final-project-team-16.git
+cd final-project-team-16
+make env
+conda activate bpd-rhythm
+```
+
+`make env` creates the conda environment `bpd-rhythm` from `environment.yml`. If the environment already exists, the same command updates it to match the file. Run `make help` to list all targets.
