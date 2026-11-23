@@ -5,11 +5,24 @@ from pathlib import Path
 
 
 def classify_collisions(rows, mapping):
-    """Return a list of CSV row dictionaries with alcohol_pcf_status added.
+    """Classify recorded primary collision factors using reviewed descriptions.
 
-    rows is an iterable of CSV row dictionaries; mapping maps exact PCF
-    descriptions to reviewed statuses. Reject unreviewed labels and missing
-    or repeated ObjectId values so counts remain reproducible.
+    Parameters
+    ----------
+    rows : iterable of dict
+        Collision CSV records containing ObjectId and PCF Description.
+    mapping : dict of str to str
+        Exact PCF descriptions mapped to reviewed alcohol classification labels.
+
+    Returns
+    -------
+    list of dict
+        Copies of the input rows in source order, each with alcohol_pcf_status.
+
+    Raises
+    ------
+    ValueError
+        If an ID is blank or repeated, or a PCF description has no mapping.
     """
     events = []
     seen = set()
@@ -29,8 +42,10 @@ def classify_collisions(rows, mapping):
 
 def main():
     """Take no arguments, write the classified collision CSV, and return None."""
+    # Load reviewed labels from the same snapshot as the collision records.
     with Path('data/mappings/collision_pcf.csv').open(newline='', encoding='utf-8') as source:
         mapping = {r['description']: r['status'] for r in csv.DictReader(source)}
+    # Preserve the source column order and append the A4 classification.
     with Path('data/raw/collision_data.csv').open(newline='', encoding='utf-8-sig') as source:
         reader = csv.DictReader(source)
         fields = reader.fieldnames + ['alcohol_pcf_status']
