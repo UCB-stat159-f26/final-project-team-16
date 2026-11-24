@@ -8,7 +8,9 @@ import pytest
 
 from bpdtools.sectors import (
     EARTH_RADIUS_M,
+    LOOKUP_COLUMNS,
     assign_sectors,
+    build_lookup,
     haversine_m,
     load_sector_features,
     normalize_block_address,
@@ -265,3 +267,65 @@ def test_haversine_m_measures_one_degree_of_latitude():
     distance = haversine_m([-122.0, -122.0], [37.0, 0.0], [-122.0, -122.0], [38.0, 1.0])
     expected = EARTH_RADIUS_M * np.pi / 180
     assert distance == pytest.approx([expected, expected])
+
+
+def make_lookup_cases():
+    """Build crime cases that test each rule of build_lookup.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Columns Block_Address, lat, and lon as text, one row per case, on the
+        two test squares: three cases of A ST in sector 1, two cases of one
+        intersection in two street orders in sector 2, one case of C ST
+        outside both squares, and cases that the rules leave out.
+    """
+    # The last three cases have no point, a point outside the box, or no
+    # address, so the lookup does not use them.
+    return pd.DataFrame(
+        {
+            "Block_Address": [
+                "A ST",
+                "a st",
+                " A ST",
+                "B ST & A ST",
+                "A ST & B ST",
+                "C ST",
+                "D ST",
+                "E ST",
+                None,
+            ],
+            "lat": ["0.5", "0.5", "0.5", "0.5", "0.5", "1.5", None, "10", "0.5"],
+            "lon": ["0.2", "0.4", "0.9", "1.5", "1.7", "2.5", None, "10", "0.5"],
+        }
+    )
+
+
+def test_build_lookup_takes_the_median_point_of_each_key():
+    """Check the keys, counts, median points, sectors, and statuses."""
+    # The box from -1 to 2 (lat) and -1 to 3 (lon) leaves out E ST only.
+    lookup = build_lookup(make_lookup_cases(), two_squares(), box=(-1, 2, -1, 3))
+    assert list(lookup.columns) == list(LOOKUP_COLUMNS)
+    assert lookup["block_key"].tolist() == ["A ST", "A ST & B ST", "C ST"]
+    assert lookup["n_cases"].tolist() == [3, 2, 1]
+    assert lookup["lon"].tolist() == pytest.approx([0.4, 1.6, 2.5])
+    assert lookup["Sector"].astype("string").tolist() == ["1", "2", pd.NA]
+    assert lookup["sector_status"].tolist() == ["assigned", "assigned", "outside"]
+
+
+def test_build_lookup_gives_the_largest_distance_as_spread():
+    """Check that spread_m is the farthest case from the median, or 0."""
+    # A ST: the farthest case is at lon 0.9, the median at lon 0.4. The
+    # intersection: both cases are 0.1 degrees from the median at lon 1.6.
+    lookup = build_lookup(make_lookup_cases(), two_squares(), box=(-1, 2, -1, 3))
+    farthest = haversine_m([0.9, 1.7], [0.5, 0.5], [0.4, 1.6], [0.5, 0.5])
+    expected = [*farthest.round(1).tolist(), 0.0]
+    assert lookup["spread_m"].tolist() == expected
+
+
+def test_build_lookup_rejects_cases_without_block_address():
+    """Check that a table without Block_Address raises a KeyError."""
+    # The calls table spells the column "Block Address".
+    calls = pd.DataFrame({"Block Address": ["A ST"], "lat": ["0.5"], "lon": ["0.5"]})
+    with pytest.raises(KeyError, match="Block_Address"):
+        build_lookup(calls, two_squares())
