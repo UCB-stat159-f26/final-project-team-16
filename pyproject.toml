@@ -25,3 +25,17 @@ testpaths = ["tests"]
 pythonpath = ["."]
 # Treat every warning as an error, so that a warning cannot pass unnoticed.
 filterwarnings = ["error"]
+
+# Settings for ruff, the linter and formatter that `make lint` runs.
+[tool.ruff]
+# Longest allowed line, the ruff and black default.
+line-length = 88
+
+[tool.ruff.lint]
+# E and W: pycodestyle errors and warnings. F: pyflakes (unused imports and
+# undefined names). I: import order. D: docstrings. N: pep8 names.
+select = ["E", "F", "W", "I", "D", "N"]
+
+# Check docstrings against the NumPy style that the project uses.
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
