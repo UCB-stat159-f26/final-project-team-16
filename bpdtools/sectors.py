@@ -1,8 +1,19 @@
-"""Make block address keys that match across tables.
+"""Make block address keys and read the police beat polygons.
 
 normalize_block_address turns block addresses into keys that match across
 tables.
+load_sector_features reads the beat polygons of
+data/boundaries/police_beats.geojson.
 """
+
+import json
+import os
+import pathlib
+
+from bpdtools.paths import repo_path
+
+# GeoJSON geometry types that a beat feature can have.
+POLYGON_TYPES = ("Polygon", "MultiPolygon")
 
 
 def address_key(address):
@@ -71,3 +82,62 @@ def normalize_block_address(addresses):
         )
     # Make the key of each address; a missing address stays missing.
     return addresses.map(address_key, na_action="ignore").astype("str")
+
+
+def load_sector_features(path=None):
+    """Read the police beat polygons from a GeoJSON file.
+
+    Parameters
+    ----------
+    path : str or pathlib.Path, optional
+        Path of a GeoJSON FeatureCollection. The default is
+        data/boundaries/police_beats.geojson in the repository.
+
+    Returns
+    -------
+    list of dict
+        The GeoJSON features, one per beat, in file order.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the file does not exist.
+    ValueError
+        If the file has no "features" list, or if a feature is not a Polygon
+        or MultiPolygon, or has no Sector property.
+    """
+    # Default: the beats file of the repository.
+    if path is None:
+        path = repo_path("data", "boundaries", "police_beats.geojson")
+    path = pathlib.Path(path)
+    # Show the path relative to the repository root in error messages.
+    shown_path = os.path.relpath(path, repo_path())
+    # Stop with a clear message when the file is not there.
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Beats file not found: {shown_path}. Pass the path of the police "
+            "beats GeoJSON file, or restore data/boundaries/police_beats.geojson."
+        )
+    # Read the FeatureCollection and take its list of features. json.loads
+    # finds the text encoding of the bytes by itself.
+    collection = json.loads(path.read_bytes())
+    features = collection.get("features") if isinstance(collection, dict) else None
+    if not isinstance(features, list):
+        raise ValueError(
+            f"{shown_path} has no 'features' list. Pass a GeoJSON FeatureCollection."
+        )
+    # Check every beat, so that a bad file fails here and not later.
+    for position, beat in enumerate(features):
+        geometry_type = (beat.get("geometry") or {}).get("type")
+        if geometry_type not in POLYGON_TYPES:
+            raise ValueError(
+                f"Feature {position} of {shown_path} has geometry type "
+                f"{geometry_type!r}. Each beat must be a Polygon or a MultiPolygon."
+            )
+        sector_label = (beat.get("properties") or {}).get("Sector")
+        if sector_label is None or str(sector_label).strip() == "":
+            raise ValueError(
+                f"Feature {position} of {shown_path} has no Sector property. "
+                "Add the sector number of the beat to its properties."
+            )
+    return features
