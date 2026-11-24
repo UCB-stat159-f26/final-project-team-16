@@ -1,5 +1,7 @@
 # The rhythm of a college town
 
+[![tests](https://github.com/UCB-stat159-f26/final-project-team-16/actions/workflows/tests.yml/badge.svg)](https://github.com/UCB-stat159-f26/final-project-team-16/actions/workflows/tests.yml)
+
 When and where do problems arise in Berkeley, and does police enforcement follow them?
 
 This repository holds the final project of Team 16 for STAT 159 at UC Berkeley, Fall 2026. The project uses open data from the [Berkeley Police Department Transparency Hub](https://bpd-transparency-initiative-berkeleypd.hub.arcgis.com/search).
@@ -47,3 +49,11 @@ make test
 ```
 
 `make test` runs `python -m pytest` inside the `bpd-rhythm` environment. pytest reads its settings from `pyproject.toml`, runs the tests in `tests/`, and treats every warning as an error.
+
+### Checking the code
+
+```bash
+make lint
+```
+
+`make lint` runs `ruff check .` and then `ruff format --check .` inside the `bpd-rhythm` environment. The first command checks code style, import order, names, and docstrings in the NumPy style. The second command lists the files that `ruff format` would change. Both commands read their settings from `pyproject.toml` and also check the notebooks. To format a file, run `ruff format <file>` in the activated environment.

@@ -14,6 +14,14 @@ help:
 env:
 	conda env update --name $(ENV_NAME) --file environment.yml --prune
 
+# Check the code with ruff: lint rules first, then the format. ruff reads its
+# settings from pyproject.toml and also checks the notebooks.
+.PHONY: lint
+## lint: check code style, names, and docstrings with ruff
+lint:
+	conda run --no-capture-output --name $(ENV_NAME) ruff check .
+	conda run --no-capture-output --name $(ENV_NAME) ruff format --check .
+
 # Run pytest inside the environment without activating it. pytest reads its
 # settings from pyproject.toml.
 ## test: run the unit tests in tests/
