@@ -5,6 +5,7 @@ tables.
 load_sector_features reads the beat polygons of
 data/boundaries/police_beats.geojson.
 assign_sectors places map points in these polygons.
+haversine_m measures the distance between two map points.
 """
 
 import json
@@ -26,6 +27,9 @@ NO_SECTOR_LABELS = ("missing", "outside", "ambiguous")
 # matplotlib's contains_points with +EDGE_RADIUS and with -EDGE_RADIUS; a
 # point for which the two answers differ is on the edge of the ring.
 EDGE_RADIUS = 1e-10
+
+# Mean radius of the Earth in metres, for the haversine distance.
+EARTH_RADIUS_M = 6_371_008.8
 
 
 def address_key(address):
@@ -237,3 +241,36 @@ def assign_sectors(lon, lat, features):
         labels[inside & valid] = sector_label
         labels[ambiguous & valid] = "ambiguous"
     return labels
+
+
+def haversine_m(start_lon, start_lat, end_lon, end_lat):
+    """Compute the great-circle distance between pairs of points.
+
+    Parameters
+    ----------
+    start_lon : array-like of float
+        Longitude of the first point of each pair, in degrees.
+    start_lat : array-like of float
+        Latitude of the first point of each pair, in degrees.
+    end_lon : array-like of float
+        Longitude of the second point of each pair, in degrees.
+    end_lat : array-like of float
+        Latitude of the second point of each pair, in degrees.
+
+    Returns
+    -------
+    numpy.ndarray of float
+        Distance in metres between the two points of each pair, on a sphere
+        with radius EARTH_RADIUS_M.
+    """
+    # Convert the degrees to radians.
+    start_lon, start_lat, end_lon, end_lat = (
+        np.radians(np.asarray(values, dtype=float))
+        for values in (start_lon, start_lat, end_lon, end_lat)
+    )
+    # Haversine formula for the central angle between the two points.
+    half_chord = (
+        np.sin((end_lat - start_lat) / 2) ** 2
+        + np.cos(start_lat) * np.cos(end_lat) * np.sin((end_lon - start_lon) / 2) ** 2
+    )
+    return 2 * EARTH_RADIUS_M * np.arcsin(np.sqrt(half_chord))
