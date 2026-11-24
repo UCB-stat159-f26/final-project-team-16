@@ -40,3 +40,35 @@ def local_times_from_epoch(milliseconds):
     local_times = utc_times.dt.tz_convert(LOCAL_TIME_ZONE)
     # Drop the time zone and keep the local wall clock time.
     return local_times.dt.tz_localize(None)
+
+
+def require_columns(table, needed_columns, table_name):
+    """Check that a table has every column that a step needs.
+
+    Parameters
+    ----------
+    table : pandas.DataFrame
+        The table to check.
+    needed_columns : sequence of str
+        Names of the columns that must be in `table`.
+    table_name : str
+        Short name of the table for the error message, for example "crime".
+
+    Returns
+    -------
+    None
+        The function returns nothing when every column is there.
+
+    Raises
+    ------
+    KeyError
+        If a column of `needed_columns` is not in `table`. The message names every
+        missing column.
+    """
+    # Collect every missing column, so that one message names them all.
+    missing_columns = [name for name in needed_columns if name not in table.columns]
+    if missing_columns:
+        raise KeyError(
+            f"The {table_name} table has no column {missing_columns}. Pass a "
+            f"table with all of the columns {list(needed_columns)}."
+        )
