@@ -21,12 +21,13 @@ test:
 	conda run --no-capture-output --name $(ENV_NAME) python -m pytest
 
 # Download the raw Calls for Service and crime cases files, then rebuild the
-# 2021-2025 tables from them. This target needs the internet; data/ is a
-# folder, so the target is phony.
+# 2021-2025 tables and the block address to sector lookup from them. This
+# target needs the internet; data/ is a folder, so the target is phony.
 .PHONY: data
-## data: download the raw Calls for Service and crime files and rebuild their tables
+## data: download the raw Calls for Service and crime files and rebuild the tables and lookup
 data:
 	conda run --no-capture-output --name $(ENV_NAME) python scripts/download_calls.py
 	conda run --no-capture-output --name $(ENV_NAME) python scripts/prepare_calls.py
 	conda run --no-capture-output --name $(ENV_NAME) python scripts/download_crime_cases.py
 	conda run --no-capture-output --name $(ENV_NAME) python scripts/prepare_crime_cases.py
+	conda run --no-capture-output --name $(ENV_NAME) python scripts/prepare_address_sectors.py
