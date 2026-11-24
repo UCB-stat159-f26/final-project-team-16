@@ -1,0 +1,308 @@
+"""Tests for bpdtools.crime."""
+
+from datetime import datetime, timezone
+
+import pandas as pd
+import pytest
+
+from bpdtools.crime import (
+    clear_placeholder_points,
+    lat_lon_numbers,
+    local_times_from_epoch,
+    one_row_per_case,
+    read_raw_cases,
+    require_columns,
+)
+
+
+def utc_milliseconds(year, month, day, hour, minute):
+    """Give the epoch milliseconds of a UTC date and time.
+
+    Parameters
+    ----------
+    year, month, day, hour, minute : int
+        The date and time in UTC.
+
+    Returns
+    -------
+    int
+        Milliseconds since 1970-01-01 00:00 UTC.
+    """
+    # Build the instant in UTC with the standard library, not with the
+    # function under test, so that the expected values are independent.
+    instant = datetime(year, month, day, hour, minute, tzinfo=timezone.utc)
+    return int(instant.timestamp()) * 1000
+
+
+def test_local_times_use_daylight_saving_time_in_july():
+    """Check that 2024-07-04 19:00 UTC is 12:00 local time (UTC-7)."""
+    # July: 19:00 UTC minus 7 hours is 12:00 local time.
+    epoch = pd.Series([utc_milliseconds(2024, 7, 4, 19, 0)])
+    result = local_times_from_epoch(epoch)
+    assert result.iloc[0] == pd.Timestamp("2024-07-04 12:00:00")
+
+
+def test_local_times_use_standard_time_in_december():
+    """Check that 2024-12-02 08:15 UTC is 00:15 local time (UTC-8)."""
+    # December: 08:15 UTC minus 8 hours is 00:15 local time.
+    epoch = pd.Series([utc_milliseconds(2024, 12, 2, 8, 15)])
+    result = local_times_from_epoch(epoch)
+    assert result.iloc[0] == pd.Timestamp("2024-12-02 00:15:00")
+
+
+def test_local_times_keep_the_local_day_when_utc_is_the_next_day():
+    """Check that 2024-12-26 06:25 UTC stays on 2024-12-25 at 22:25 local time."""
+    # The epoch is given as text, as it appears in the raw CSV.
+    epoch = pd.Series([str(utc_milliseconds(2024, 12, 26, 6, 25))])
+    result = local_times_from_epoch(epoch)
+    assert result.iloc[0] == pd.Timestamp("2024-12-25 22:25:00")
+
+
+def test_local_times_give_nat_for_a_missing_value():
+    """Check that a missing epoch gives NaT and the result has no time zone."""
+    # One missing value next to one valid value.
+    epoch = pd.Series([None, str(utc_milliseconds(2024, 7, 4, 19, 0))])
+    result = local_times_from_epoch(epoch)
+    assert pd.isna(result.iloc[0])
+    assert result.dt.tz is None
+
+
+def test_local_times_reject_text_that_is_not_a_number():
+    """Check that a value such as "2024-07-04" raises a ValueError."""
+    # A date string is not epoch milliseconds.
+    with pytest.raises(ValueError, match="epoch milliseconds"):
+        local_times_from_epoch(pd.Series(["2024-07-04"]))
+
+
+def test_require_columns_accepts_a_table_with_every_column():
+    """Check that a table with all needed columns raises nothing."""
+    # An extra column, Case_Number, is allowed.
+    table = pd.DataFrame(
+        {"Case_Number": ["2024-1"], "lat": ["37.87"], "lon": ["-122.27"]}
+    )
+    assert require_columns(table, ["lat", "lon"], "crime") is None
+
+
+def test_require_columns_names_every_missing_column():
+    """Check that the KeyError names the table and each missing column."""
+    # Both point columns are absent.
+    table = pd.DataFrame({"Case_Number": ["2024-1"]})
+    with pytest.raises(KeyError, match=r"crime table has no column \['lat', 'lon'\]"):
+        require_columns(table, ["Case_Number", "lat", "lon"], "crime")
+
+
+def make_case_rows(incident_types):
+    """Build a small crime table with one case and one row per statute.
+
+    Parameters
+    ----------
+    incident_types : list of str
+        Incident_Type of each statute row, in order.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Rows of case 2024-00000001 with the columns that one_row_per_case
+        checks, plus a Statute column that differs between rows.
+    """
+    # Repeat the same case fields on every statute row, as in the source.
+    n_statutes = len(incident_types)
+    return pd.DataFrame(
+        {
+            "Case_Number": ["2024-00000001"] * n_statutes,
+            "Occurred_Datetime": ["2024-12-25 22:25:00"] * n_statutes,
+            "Incident_Type": incident_types,
+            "Statute": [f"PC {number}" for number in range(n_statutes)],
+            "Block_Address": ["2400 TELEGRAPH AVE"] * n_statutes,
+            "lat": ["37.8676"] * n_statutes,
+            "lon": ["-122.2590"] * n_statutes,
+        }
+    )
+
+
+def test_one_row_per_case_collapses_two_statutes():
+    """Check that a case with two statute rows and a second case give 2 rows."""
+    # One case with two statute rows that agree on the case fields.
+    case_rows = make_case_rows(["Assault/Battery Felony"] * 2)
+    # A second case with one row and a missing point, which must stay.
+    other_case = case_rows.iloc[[0]].assign(
+        Case_Number="2024-00000002", lat=None, lon=None
+    )
+    result = one_row_per_case(pd.concat([case_rows, other_case]))
+    assert list(result["Case_Number"]) == ["2024-00000001", "2024-00000002"]
+    # The first statute row of the case is the one that is kept.
+    assert result.loc[0, "Statute"] == "PC 0"
+
+
+def test_one_row_per_case_rejects_two_incident_types():
+    """Check that two Incident_Type values in one case raise a ValueError."""
+    # One case whose two statute rows have different Incident_Type values.
+    case_rows = make_case_rows(
+        ["Assault/Battery Felony", "Assault/Battery Misdemeanor"]
+    )
+    # The error must name the case and the column that disagree.
+    with pytest.raises(ValueError, match="2024-00000001 has different Incident_Type"):
+        one_row_per_case(case_rows)
+
+
+def test_lat_lon_numbers_reads_text_and_blanks():
+    """Check that text points become numbers in order and blanks become NaN."""
+    # The raw CSV stores the points as text; the index is kept.
+    table = pd.DataFrame(
+        {"lat": ["37.8676", None], "lon": ["-122.2590", None]}, index=[5, 9]
+    )
+    latitudes, longitudes = lat_lon_numbers(table, "crime")
+    assert latitudes[5] == 37.8676
+    assert longitudes[5] == -122.2590
+    assert pd.isna(latitudes[9])
+    assert pd.isna(longitudes[9])
+
+
+def test_lat_lon_numbers_rejects_text_that_is_not_a_number():
+    """Check that a word in lon raises a ValueError that names the table."""
+    # "unknown" cannot be read as a coordinate.
+    table = pd.DataFrame({"lat": ["37.8676"], "lon": ["unknown"]})
+    with pytest.raises(ValueError, match="numbers or blank in the crime table"):
+        lat_lon_numbers(table, "crime")
+
+
+def test_lat_lon_numbers_rejects_a_missing_point_column():
+    """Check that a table without lon raises a KeyError that names lon."""
+    # Only lat is present.
+    table = pd.DataFrame({"lat": ["37.8676"]})
+    with pytest.raises(KeyError, match=r"no column \['lon'\]"):
+        lat_lon_numbers(table, "crime")
+
+
+def make_point_cases():
+    """Build a small table of cases at the placeholder point and elsewhere.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Five cases with Case_Number, Block_Address, lat, and lon as text, as
+        in the raw CSV: a case at the headquarters address (written with
+        extra spaces), a case at another address with the placeholder point,
+        a case with its own point, a case without a point, and a case with a
+        blank address and the placeholder point.
+    """
+    # The placeholder point as the layer writes it.
+    headquarters_lat = "37.87022021065617"
+    headquarters_lon = "-122.27285493558117"
+    return pd.DataFrame(
+        {
+            "Case_Number": ["2022-1", "2022-2", "2022-3", "2022-4", "2022-5"],
+            "Block_Address": [
+                " 2100 MARTIN LUTHER KING  JR WAY",
+                "3000 TELEGRAPH AVE",
+                "2400 DURANT AVE",
+                None,
+                None,
+            ],
+            "lat": [
+                headquarters_lat,
+                headquarters_lat,
+                "37.8676",
+                None,
+                headquarters_lat,
+            ],
+            "lon": [
+                headquarters_lon,
+                headquarters_lon,
+                "-122.2590",
+                None,
+                headquarters_lon,
+            ],
+        }
+    )
+
+
+def test_clear_placeholder_points_keeps_the_headquarters_point():
+    """Check that a case at the headquarters address keeps the point."""
+    # Extra spaces in the address must not hide the headquarters address.
+    result = clear_placeholder_points(make_point_cases())
+    assert result.loc[0, "lat"] == "37.87022021065617"
+    assert result.loc[0, "lon"] == "-122.27285493558117"
+
+
+def test_clear_placeholder_points_clears_another_address():
+    """Check that cases at another or a blank address lose the placeholder."""
+    # 3000 TELEGRAPH AVE and a blank address are not at headquarters, so the
+    # point is removed from both cases.
+    result = clear_placeholder_points(make_point_cases())
+    assert result.loc[[1, 4], "lat"].isna().all()
+    assert result.loc[[1, 4], "lon"].isna().all()
+
+
+def test_clear_placeholder_points_keeps_normal_and_missing_points():
+    """Check that an own point stays and a missing point stays missing."""
+    # Neither case is at the placeholder point, so both are unchanged.
+    result = clear_placeholder_points(make_point_cases())
+    assert result.loc[2, "lat"] == "37.8676"
+    assert result.loc[2, "lon"] == "-122.2590"
+    assert pd.isna(result.loc[3, "lat"])
+    assert pd.isna(result.loc[3, "lon"])
+
+
+def test_clear_placeholder_points_leaves_its_input_unchanged():
+    """Check that the function returns a copy and does not edit its input."""
+    # Compare the input with a fresh copy after the call.
+    cases = make_point_cases()
+    clear_placeholder_points(cases)
+    pd.testing.assert_frame_equal(cases, make_point_cases())
+
+
+# Header and three rows of a small raw crime CSV: a case with a point, a
+# case with the no-point code, and a case whose type is the text "None".
+RAW_CASES_TEXT = (
+    "Case_Number,Incident_Type,Block_Address,lat,lon\n"
+    "2024-00000001,Assault/Battery Felony,2400 DURANT AVE,37.8676,-122.2590\n"
+    "2024-00000002,Vandalism,,-361,-361\n"
+    "2024-00000003,None,1900 OXFORD ST,37.8710,-122.2660\n"
+)
+
+
+def test_read_raw_cases_blanks_the_no_point_code(tmp_path):
+    """Check that -361 becomes missing and other points stay as text."""
+    # Write the small raw CSV, then read it back.
+    path = tmp_path / "crime_cases.csv"
+    path.write_text(RAW_CASES_TEXT)
+    result = read_raw_cases(path, ["Case_Number", "Block_Address"])
+    assert result.loc[0, "lat"] == "37.8676"
+    assert result.loc[1, ["lat", "lon"]].isna().all()
+    assert pd.isna(result.loc[1, "Block_Address"])
+
+
+def test_read_raw_cases_keeps_the_text_none(tmp_path):
+    """Check that the label "None" stays text and is not a missing value."""
+    # pandas reads "None" as missing unless the reader turns that off.
+    path = tmp_path / "crime_cases.csv"
+    path.write_text(RAW_CASES_TEXT)
+    result = read_raw_cases(path, ["Incident_Type"])
+    assert result.loc[2, "Incident_Type"] == "None"
+
+
+def test_read_raw_cases_rejects_a_missing_column(tmp_path):
+    """Check that a needed column that the file lacks raises a ValueError."""
+    # The small CSV has no Occurred_Datetime column.
+    path = tmp_path / "crime_cases.csv"
+    path.write_text(RAW_CASES_TEXT)
+    with pytest.raises(ValueError, match="Occurred_Datetime"):
+        read_raw_cases(path, ["Case_Number", "Occurred_Datetime"])
+
+
+def test_read_raw_cases_names_the_file_for_a_bad_point(tmp_path):
+    """Check that a word in lat raises a ValueError that names the file."""
+    # The third case has a word where its lat number belongs.
+    path = tmp_path / "crime_cases.csv"
+    path.write_text(RAW_CASES_TEXT.replace("37.8710", "unknown"))
+    with pytest.raises(ValueError, match="crime_cases.csv is not a number") as caught:
+        read_raw_cases(path, ["Case_Number"])
+    assert "python scripts/download_crime_cases.py" in str(caught.value)
+
+
+def test_read_raw_cases_rejects_a_missing_file(tmp_path):
+    """Check that a path without a file raises a FileNotFoundError."""
+    # The folder is empty, so the file does not exist.
+    with pytest.raises(FileNotFoundError, match="Raw file not found"):
+        read_raw_cases(tmp_path / "crime_cases.csv", ["Case_Number"])

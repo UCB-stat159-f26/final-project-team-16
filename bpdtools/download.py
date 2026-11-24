@@ -227,3 +227,81 @@ def with_retries(action, source_name, retry_on=RETRY_ERRORS, sleep=time.sleep):
         "Wait a few minutes, check the internet connection, and run the "
         "script again."
     ) from last_error
+
+
+def read_all_pages(fetch_page, expected_count, records_per_page, unique_id_field):
+    """Read a paged data source and check that the pages fit together.
+
+    Parameters
+    ----------
+    fetch_page : callable
+        Function that takes the offset of a page (int, the number of records
+        to skip) and returns a pair (field_names, page_records): a list of
+        field names in source order, and a list with one dict of values per
+        record. Tests pass a stub here.
+    expected_count : int
+        Number of records that the source reported before the download.
+    records_per_page : int
+        Number of records per page. The offsets are 0, `records_per_page`,
+        2 * `records_per_page`, and so on, while they are below
+        `expected_count`.
+    unique_id_field : str
+        Name of the field that holds the unique ID of a record.
+
+    Returns
+    -------
+    field_names : list of str
+        Field names of the first page, in source order.
+    downloaded_records : list of dict
+        The records of all pages, in page order.
+
+    Raises
+    ------
+    RuntimeError
+        If `expected_count` is 0, because then there is no page to read.
+        Also if the pages have different fields, if an ID repeats, or if
+        the number of records differs from `expected_count`. Each of these
+        last three means that the source changed during the download; run
+        the download again. An error of `fetch_page` is passed on unchanged.
+    """
+    # Threshold: a source that reports no records has no page and no field
+    # names, so stop with a clear message before any page is read.
+    if expected_count == 0:
+        raise RuntimeError(
+            "The source reported no records, so there is nothing to download. "
+            "Check that the query selects records and that the source address "
+            "is right, then run the download again."
+        )
+    # Read the pages one after the other, `records_per_page` records each.
+    field_names = None
+    downloaded_records = []
+    seen_ids = set()
+    for offset in range(0, expected_count, records_per_page):
+        page_fields, page_records = fetch_page(offset)
+        # All pages must have the same fields in the same order.
+        if field_names is None:
+            field_names = page_fields
+        elif page_fields != field_names:
+            raise RuntimeError(
+                f"The page at offset {offset} has other fields than the first "
+                "page. Run the download again."
+            )
+        # Deduplication check: offset paging on a live source can repeat a
+        # record when rows are added during the download, so stop on a
+        # repeated ID instead of keeping the record twice.
+        for attributes in page_records:
+            if attributes[unique_id_field] in seen_ids:
+                raise RuntimeError(
+                    f"{unique_id_field} {attributes[unique_id_field]} appears "
+                    "twice. The source changed during the download; run it "
+                    "again."
+                )
+            seen_ids.add(attributes[unique_id_field])
+        downloaded_records.extend(page_records)
+    # A missing or extra record also means that the source changed.
+    if len(downloaded_records) != expected_count:
+        raise RuntimeError(
+            f"Downloaded {len(downloaded_records):,} records, but the source "
+            f"reported {expected_count:,}. Run the download again."
+        )
+    return field_names, downloaded_records
