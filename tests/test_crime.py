@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 from bpdtools.crime import (
+    clear_placeholder_points,
     lat_lon_numbers,
     local_times_from_epoch,
     one_row_per_case,
@@ -170,3 +171,81 @@ def test_lat_lon_numbers_rejects_a_missing_point_column():
     table = pd.DataFrame({"lat": ["37.8676"]})
     with pytest.raises(KeyError, match=r"no column \['lon'\]"):
         lat_lon_numbers(table, "crime")
+
+
+def make_point_cases():
+    """Build a small table of cases at the placeholder point and elsewhere.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Five cases with Case_Number, Block_Address, lat, and lon as text, as
+        in the raw CSV: a case at the headquarters address (written with
+        extra spaces), a case at another address with the placeholder point,
+        a case with its own point, a case without a point, and a case with a
+        blank address and the placeholder point.
+    """
+    # The placeholder point as the layer writes it.
+    headquarters_lat = "37.87022021065617"
+    headquarters_lon = "-122.27285493558117"
+    return pd.DataFrame(
+        {
+            "Case_Number": ["2022-1", "2022-2", "2022-3", "2022-4", "2022-5"],
+            "Block_Address": [
+                " 2100 MARTIN LUTHER KING  JR WAY",
+                "3000 TELEGRAPH AVE",
+                "2400 DURANT AVE",
+                None,
+                None,
+            ],
+            "lat": [
+                headquarters_lat,
+                headquarters_lat,
+                "37.8676",
+                None,
+                headquarters_lat,
+            ],
+            "lon": [
+                headquarters_lon,
+                headquarters_lon,
+                "-122.2590",
+                None,
+                headquarters_lon,
+            ],
+        }
+    )
+
+
+def test_clear_placeholder_points_keeps_the_headquarters_point():
+    """Check that a case at the headquarters address keeps the point."""
+    # Extra spaces in the address must not hide the headquarters address.
+    result = clear_placeholder_points(make_point_cases())
+    assert result.loc[0, "lat"] == "37.87022021065617"
+    assert result.loc[0, "lon"] == "-122.27285493558117"
+
+
+def test_clear_placeholder_points_clears_another_address():
+    """Check that cases at another or a blank address lose the placeholder."""
+    # 3000 TELEGRAPH AVE and a blank address are not at headquarters, so the
+    # point is removed from both cases.
+    result = clear_placeholder_points(make_point_cases())
+    assert result.loc[[1, 4], "lat"].isna().all()
+    assert result.loc[[1, 4], "lon"].isna().all()
+
+
+def test_clear_placeholder_points_keeps_normal_and_missing_points():
+    """Check that an own point stays and a missing point stays missing."""
+    # Neither case is at the placeholder point, so both are unchanged.
+    result = clear_placeholder_points(make_point_cases())
+    assert result.loc[2, "lat"] == "37.8676"
+    assert result.loc[2, "lon"] == "-122.2590"
+    assert pd.isna(result.loc[3, "lat"])
+    assert pd.isna(result.loc[3, "lon"])
+
+
+def test_clear_placeholder_points_leaves_its_input_unchanged():
+    """Check that the function returns a copy and does not edit its input."""
+    # Compare the input with a fresh copy after the call.
+    cases = make_point_cases()
+    clear_placeholder_points(cases)
+    pd.testing.assert_frame_equal(cases, make_point_cases())
