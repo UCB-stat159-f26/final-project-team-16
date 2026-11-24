@@ -1,4 +1,5 @@
 """Expand reviewed event windows to one row per local calendar date."""
+
 import csv
 from datetime import date, timedelta
 from pathlib import Path
@@ -24,8 +25,14 @@ def daily_flags(windows):
         before it starts, or an event type uses the reserved name "date".
     """
     # Parse the source dates before comparing window boundaries.
-    intervals = [(r["event_type"], date.fromisoformat(r["start_date"]),
-                  date.fromisoformat(r["end_date"])) for r in windows]
+    intervals = [
+        (
+            r["event_type"],
+            date.fromisoformat(r["start_date"]),
+            date.fromisoformat(r["end_date"]),
+        )
+        for r in windows
+    ]
     # Require at least one window and ordered endpoints.
     if not intervals or any(end < start for _, start, end in intervals):
         raise ValueError("Expected nonempty windows with start <= end")
@@ -44,7 +51,7 @@ def daily_flags(windows):
 
 
 def main():
-    """Take no arguments, write the daily calendar beside its source, and return None."""
+    """Write the daily calendar beside its source."""
     folder = Path(__file__).resolve().parents[1] / "data/calendar"
     # Read the source windows and expand them into daily records.
     with (folder / "event_windows.csv").open(newline="", encoding="utf-8") as src:
