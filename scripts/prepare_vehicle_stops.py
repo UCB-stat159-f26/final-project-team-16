@@ -3,10 +3,18 @@
 Run from the project root with python3 scripts/prepare_vehicle_stops.py.
 Source date, time, and coordinate strings are preserved for downstream use.
 """
+
 import csv
 from pathlib import Path
 
-FIELDS = ("LEA_Record_ID", "TypeOfStopDesc", "StopDate", "StopTime", "Latitude", "Longitude")
+FIELDS = (
+    "LEA_Record_ID",
+    "TypeOfStopDesc",
+    "StopDate",
+    "StopTime",
+    "Latitude",
+    "Longitude",
+)
 
 
 def vehicle_stops(rows):
@@ -46,7 +54,9 @@ def vehicle_stops(rows):
 def main():
     """Take no arguments, write the vehicle-stop CSV, and return None."""
     # Group the original person records before exporting event counts.
-    with Path("data/raw/stop_data.csv").open(encoding="utf-8-sig", newline="") as source:
+    with Path("data/raw/stop_data.csv").open(
+        encoding="utf-8-sig", newline=""
+    ) as source:
         events = vehicle_stops(csv.DictReader(source))
     # Export one row per stop in the column order used by the notebooks.
     output = Path("data/processed/vehicle_stops.csv")
