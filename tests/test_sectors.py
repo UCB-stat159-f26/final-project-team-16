@@ -1,5 +1,6 @@
 """Tests for bpdtools.sectors."""
 
+import io
 import json
 
 import numpy as np
@@ -10,6 +11,7 @@ from bpdtools.sectors import (
     EARTH_RADIUS_M,
     LOOKUP_COLUMNS,
     assign_sectors,
+    attach_address_sectors,
     build_lookup,
     haversine_m,
     load_sector_features,
@@ -329,3 +331,97 @@ def test_build_lookup_rejects_cases_without_block_address():
     calls = pd.DataFrame({"Block Address": ["A ST"], "lat": ["0.5"], "lon": ["0.5"]})
     with pytest.raises(KeyError, match="Block_Address"):
         build_lookup(calls, two_squares())
+
+
+def make_lookup():
+    """Build a small lookup table with one row for each lookup status.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Columns block_key, Sector, and sector_status, as in
+        data/processed/address_sectors.csv.
+    """
+    # Only the assigned rows have a sector. "missing" is a row without a
+    # map point.
+    return pd.DataFrame(
+        {
+            "block_key": ["A ST", "B ST", "C ST", "D ST", "A ST & B ST"],
+            "Sector": pd.array([2, None, None, None, 1], dtype="Int64"),
+            "sector_status": [
+                "assigned",
+                "outside",
+                "ambiguous",
+                "missing",
+                "assigned",
+            ],
+        }
+    )
+
+
+def test_attach_address_sectors_gives_each_status():
+    """Check the six statuses, the Int64 Sector, and the kept index."""
+    # One call for each status, and one intersection written in the other
+    # street order; the index is the incident number.
+    calls = pd.DataFrame(
+        {
+            "Block Address": [
+                " a  st",
+                "B ST",
+                "c st",
+                "D ST",
+                "E ST",
+                "  ",
+                None,
+                "B ST & A ST",
+            ]
+        },
+        index=pd.Index(
+            [f"2024-0000000{position}" for position in range(8)], name="Incident Number"
+        ),
+    )
+    result = attach_address_sectors(calls, make_lookup())
+    assert result["sector_status"].tolist() == [
+        "assigned",
+        "outside",
+        "ambiguous",
+        "no_point",
+        "unmatched",
+        "blank_address",
+        "blank_address",
+        "assigned",
+    ]
+    assert str(result["Sector"].dtype) == "Int64"
+    assert result["Sector"].iloc[0] == 2
+    assert result["Sector"].iloc[1:7].isna().all()
+    assert result["Sector"].iloc[7] == 1
+    assert result.index.equals(calls.index)
+    # The input table is not changed.
+    assert list(calls.columns) == ["Block Address"]
+
+
+def test_attach_address_sectors_reads_a_lookup_from_csv():
+    """Check that a lookup read from CSV text gives Sector 6, not 6.0."""
+    # A plain read_csv gives Sector as float64 with NaN for the blank cell.
+    text = "block_key,Sector,sector_status\nA ST,6,assigned\nB ST,,outside\n"
+    lookup = pd.read_csv(io.StringIO(text))
+    crime_cases = pd.DataFrame({"Block_Address": ["A ST", "B ST"]})
+    result = attach_address_sectors(crime_cases, lookup, address_column="Block_Address")
+    assert result["Sector"].astype("string").tolist() == ["6", pd.NA]
+
+
+def test_attach_address_sectors_rejects_repeated_lookup_keys():
+    """Check that a block_key that occurs twice in the lookup raises."""
+    # Two rows for the same key would match one call twice.
+    lookup = pd.concat([make_lookup(), make_lookup().iloc[[0]]])
+    calls = pd.DataFrame({"Block Address": ["A ST"]})
+    with pytest.raises(ValueError, match="repeated block_key"):
+        attach_address_sectors(calls, lookup)
+
+
+def test_attach_address_sectors_rejects_a_missing_address_column():
+    """Check that the wrong address column name raises a KeyError."""
+    # The crime table spells the column Block_Address.
+    crime_cases = pd.DataFrame({"Block_Address": ["A ST"]})
+    with pytest.raises(KeyError, match="address_column"):
+        attach_address_sectors(crime_cases, make_lookup())
