@@ -10,6 +10,7 @@ from bpdtools.crime import (
     lat_lon_numbers,
     local_times_from_epoch,
     one_row_per_case,
+    read_raw_cases,
     require_columns,
 )
 
@@ -249,3 +250,59 @@ def test_clear_placeholder_points_leaves_its_input_unchanged():
     cases = make_point_cases()
     clear_placeholder_points(cases)
     pd.testing.assert_frame_equal(cases, make_point_cases())
+
+
+# Header and three rows of a small raw crime CSV: a case with a point, a
+# case with the no-point code, and a case whose type is the text "None".
+RAW_CASES_TEXT = (
+    "Case_Number,Incident_Type,Block_Address,lat,lon\n"
+    "2024-00000001,Assault/Battery Felony,2400 DURANT AVE,37.8676,-122.2590\n"
+    "2024-00000002,Vandalism,,-361,-361\n"
+    "2024-00000003,None,1900 OXFORD ST,37.8710,-122.2660\n"
+)
+
+
+def test_read_raw_cases_blanks_the_no_point_code(tmp_path):
+    """Check that -361 becomes missing and other points stay as text."""
+    # Write the small raw CSV, then read it back.
+    path = tmp_path / "crime_cases.csv"
+    path.write_text(RAW_CASES_TEXT)
+    result = read_raw_cases(path, ["Case_Number", "Block_Address"])
+    assert result.loc[0, "lat"] == "37.8676"
+    assert result.loc[1, ["lat", "lon"]].isna().all()
+    assert pd.isna(result.loc[1, "Block_Address"])
+
+
+def test_read_raw_cases_keeps_the_text_none(tmp_path):
+    """Check that the label "None" stays text and is not a missing value."""
+    # pandas reads "None" as missing unless the reader turns that off.
+    path = tmp_path / "crime_cases.csv"
+    path.write_text(RAW_CASES_TEXT)
+    result = read_raw_cases(path, ["Incident_Type"])
+    assert result.loc[2, "Incident_Type"] == "None"
+
+
+def test_read_raw_cases_rejects_a_missing_column(tmp_path):
+    """Check that a needed column that the file lacks raises a ValueError."""
+    # The small CSV has no Occurred_Datetime column.
+    path = tmp_path / "crime_cases.csv"
+    path.write_text(RAW_CASES_TEXT)
+    with pytest.raises(ValueError, match="Occurred_Datetime"):
+        read_raw_cases(path, ["Case_Number", "Occurred_Datetime"])
+
+
+def test_read_raw_cases_names_the_file_for_a_bad_point(tmp_path):
+    """Check that a word in lat raises a ValueError that names the file."""
+    # The third case has a word where its lat number belongs.
+    path = tmp_path / "crime_cases.csv"
+    path.write_text(RAW_CASES_TEXT.replace("37.8710", "unknown"))
+    with pytest.raises(ValueError, match="crime_cases.csv is not a number") as caught:
+        read_raw_cases(path, ["Case_Number"])
+    assert "python scripts/download_crime_cases.py" in str(caught.value)
+
+
+def test_read_raw_cases_rejects_a_missing_file(tmp_path):
+    """Check that a path without a file raises a FileNotFoundError."""
+    # The folder is empty, so the file does not exist.
+    with pytest.raises(FileNotFoundError, match="Raw file not found"):
+        read_raw_cases(tmp_path / "crime_cases.csv", ["Case_Number"])
