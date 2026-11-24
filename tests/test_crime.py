@@ -5,7 +5,12 @@ from datetime import datetime, timezone
 import pandas as pd
 import pytest
 
-from bpdtools.crime import local_times_from_epoch, one_row_per_case, require_columns
+from bpdtools.crime import (
+    lat_lon_numbers,
+    local_times_from_epoch,
+    one_row_per_case,
+    require_columns,
+)
 
 
 def utc_milliseconds(year, month, day, hour, minute):
@@ -136,3 +141,32 @@ def test_one_row_per_case_rejects_two_incident_types():
     # The error must name the case and the column that disagree.
     with pytest.raises(ValueError, match="2024-00000001 has different Incident_Type"):
         one_row_per_case(case_rows)
+
+
+def test_lat_lon_numbers_reads_text_and_blanks():
+    """Check that text points become numbers in order and blanks become NaN."""
+    # The raw CSV stores the points as text; the index is kept.
+    table = pd.DataFrame(
+        {"lat": ["37.8676", None], "lon": ["-122.2590", None]}, index=[5, 9]
+    )
+    latitudes, longitudes = lat_lon_numbers(table, "crime")
+    assert latitudes[5] == 37.8676
+    assert longitudes[5] == -122.2590
+    assert pd.isna(latitudes[9])
+    assert pd.isna(longitudes[9])
+
+
+def test_lat_lon_numbers_rejects_text_that_is_not_a_number():
+    """Check that a word in lon raises a ValueError that names the table."""
+    # "unknown" cannot be read as a coordinate.
+    table = pd.DataFrame({"lat": ["37.8676"], "lon": ["unknown"]})
+    with pytest.raises(ValueError, match="numbers or blank in the crime table"):
+        lat_lon_numbers(table, "crime")
+
+
+def test_lat_lon_numbers_rejects_a_missing_point_column():
+    """Check that a table without lon raises a KeyError that names lon."""
+    # Only lat is present.
+    table = pd.DataFrame({"lat": ["37.8676"]})
+    with pytest.raises(KeyError, match=r"no column \['lon'\]"):
+        lat_lon_numbers(table, "crime")
