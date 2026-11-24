@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import pandas as pd
 import pytest
 
-from bpdtools.crime import local_times_from_epoch
+from bpdtools.crime import local_times_from_epoch, require_columns
 
 
 def utc_milliseconds(year, month, day, hour, minute):
@@ -65,3 +65,20 @@ def test_local_times_reject_text_that_is_not_a_number():
     # A date string is not epoch milliseconds.
     with pytest.raises(ValueError, match="epoch milliseconds"):
         local_times_from_epoch(pd.Series(["2024-07-04"]))
+
+
+def test_require_columns_accepts_a_table_with_every_column():
+    """Check that a table with all needed columns raises nothing."""
+    # An extra column, Case_Number, is allowed.
+    table = pd.DataFrame(
+        {"Case_Number": ["2024-1"], "lat": ["37.87"], "lon": ["-122.27"]}
+    )
+    assert require_columns(table, ["lat", "lon"], "crime") is None
+
+
+def test_require_columns_names_every_missing_column():
+    """Check that the KeyError names the table and each missing column."""
+    # Both point columns are absent.
+    table = pd.DataFrame({"Case_Number": ["2024-1"]})
+    with pytest.raises(KeyError, match=r"crime table has no column \['lat', 'lon'\]"):
+        require_columns(table, ["Case_Number", "lat", "lon"], "crime")
