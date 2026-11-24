@@ -13,6 +13,7 @@ from bpdtools.download import (
     check_first_line,
     open_url,
     partial_file,
+    read_all_pages,
     with_retries,
 )
 
@@ -21,6 +22,9 @@ HEADER = "id,name"
 
 # Address in the HTTP errors of the retry tests.
 TEST_URL = "https://example.org/data.csv"
+
+# Field names of the pages in the paging tests.
+STUB_FIELD_NAMES = ["ObjectId", "Case_Number"]
 
 
 def make_stub_opener(body, seen_requests):
@@ -251,3 +255,102 @@ def test_with_retries_retries_a_408_or_a_429(status):
     assert with_retries(action, "test source", sleep=pauses.append) == "done"
     assert pauses == [10]
     assert len(action.calls) == 2
+
+
+def make_page_fetcher(pages):
+    """Make a stub page reader that returns fixed pages by offset.
+
+    Parameters
+    ----------
+    pages : dict of int to tuple
+        For each offset, the pair (field_names, page_records) to return.
+
+    Returns
+    -------
+    callable
+        A function that takes an offset and returns its pair. Its `offsets`
+        attribute lists the offsets of all calls, in order.
+    """
+
+    def fetch_page(offset):
+        """Record the offset and return the stub page that starts there.
+
+        Parameters
+        ----------
+        offset : int
+            Number of records before the page.
+
+        Returns
+        -------
+        tuple
+            The pair (field_names, page_records) of `pages` for `offset`.
+        """
+        # Keep the offset so that the test can check the page order.
+        fetch_page.offsets.append(offset)
+        return pages[offset]
+
+    fetch_page.offsets = []
+    return fetch_page
+
+
+def test_read_all_pages_joins_two_pages_in_order():
+    """Check that two pages give all records in order and the first fields."""
+    # Three records in pages of two: offsets 0 and 2.
+    fetch_page = make_page_fetcher(
+        {
+            0: (STUB_FIELD_NAMES, [{"ObjectId": 1}, {"ObjectId": 2}]),
+            2: (STUB_FIELD_NAMES, [{"ObjectId": 3}]),
+        }
+    )
+    field_names, joined_records = read_all_pages(fetch_page, 3, 2, "ObjectId")
+    assert field_names == STUB_FIELD_NAMES
+    assert [record["ObjectId"] for record in joined_records] == [1, 2, 3]
+    assert fetch_page.offsets == [0, 2]
+
+
+def test_read_all_pages_rejects_a_repeated_id():
+    """Check that an ObjectId on two pages raises a RuntimeError."""
+    # Record 2 comes back on the second page, as after an insert.
+    fetch_page = make_page_fetcher(
+        {
+            0: (STUB_FIELD_NAMES, [{"ObjectId": 1}, {"ObjectId": 2}]),
+            2: (STUB_FIELD_NAMES, [{"ObjectId": 2}, {"ObjectId": 3}]),
+        }
+    )
+    with pytest.raises(RuntimeError, match="ObjectId 2 appears twice"):
+        read_all_pages(fetch_page, 4, 2, "ObjectId")
+
+
+def test_read_all_pages_rejects_a_short_total():
+    """Check that fewer records than the reported count raise a RuntimeError."""
+    # The source reported 4 records, but the pages hold only 3.
+    fetch_page = make_page_fetcher(
+        {
+            0: (STUB_FIELD_NAMES, [{"ObjectId": 1}, {"ObjectId": 2}]),
+            2: (STUB_FIELD_NAMES, [{"ObjectId": 3}]),
+        }
+    )
+    with pytest.raises(RuntimeError, match="Downloaded 3 records"):
+        read_all_pages(fetch_page, 4, 2, "ObjectId")
+
+
+def test_read_all_pages_rejects_a_changed_field_list():
+    """Check that a page with other fields than the first raises a RuntimeError."""
+    # The second page lacks the Case_Number field.
+    fetch_page = make_page_fetcher(
+        {
+            0: (STUB_FIELD_NAMES, [{"ObjectId": 1}, {"ObjectId": 2}]),
+            2: (["ObjectId"], [{"ObjectId": 3}]),
+        }
+    )
+    with pytest.raises(RuntimeError, match="other fields than the first page"):
+        read_all_pages(fetch_page, 3, 2, "ObjectId")
+
+
+def test_read_all_pages_rejects_a_source_with_no_records():
+    """Check that a reported count of 0 raises a RuntimeError before any page."""
+    # The stub has no pages, and no offset may be asked for.
+    fetch_page = make_page_fetcher({})
+    with pytest.raises(RuntimeError, match="reported no records"):
+        read_all_pages(fetch_page, 0, 2, "ObjectId")
+    assert fetch_page.offsets == []
