@@ -3,10 +3,18 @@
 import pandas as pd
 import pytest
 
-from bpdtools.load import classify_call_type, load_calls, read_text_table
+from bpdtools.load import (
+    classify_call_type,
+    load_calls,
+    load_cases,
+    read_text_table,
+)
 
 # Header of a small Calls for Service table in the committed format.
 CALL_HEADER = "Incident Number,CreateDatetime,date,Call Type\n"
+
+# Header of a small crime cases table in the committed format.
+CASE_HEADER = "Case_Number,Occurred_Datetime,date,Incident_Type,lat,lon\n"
 
 
 def write_table(folder, name, text):
@@ -111,3 +119,33 @@ def test_load_calls_names_a_missing_column(tmp_path):
     )
     with pytest.raises(KeyError, match="Call Type"):
         load_calls(write_table(tmp_path, "calls.csv", text))
+
+
+def test_load_cases_keeps_wall_clock_time_and_reads_points(tmp_path):
+    """Check local times without a shift, and numeric points with a blank."""
+    # The second case has no map point.
+    text = CASE_HEADER + (
+        "k1,2024-11-03 01:30:00,2024-11-03,Assault/Battery Felony,37.87,-122.27\n"
+        "k2,2024-03-10 03:15:00,2024-03-10,Vandalism,,\n"
+    )
+    cases = load_cases(write_table(tmp_path, "cases.csv", text))
+    assert (
+        cases["local_time"].tolist()
+        == pd.to_datetime(["2024-11-03 01:30:00", "2024-03-10 03:15:00"]).tolist()
+    )
+    assert cases.loc[0, "lat"] == 37.87
+    assert pd.isna(cases.loc[1, "lon"])
+
+
+def test_load_cases_rejects_a_date_that_does_not_match(tmp_path):
+    """Check that a date other than the date of Occurred_Datetime raises."""
+    text = CASE_HEADER + "k1,2024-11-03 01:30:00,2024-11-04,Vandalism,,\n"
+    with pytest.raises(ValueError, match="not the date"):
+        load_cases(write_table(tmp_path, "cases.csv", text))
+
+
+def test_load_cases_rejects_a_point_that_is_not_a_number(tmp_path):
+    """Check that a lat value that is a word raises a ValueError."""
+    text = CASE_HEADER + "k1,2024-11-03 01:30:00,2024-11-03,Vandalism,north,-122.27\n"
+    with pytest.raises(ValueError, match="numbers or blank"):
+        load_cases(write_table(tmp_path, "cases.csv", text))
