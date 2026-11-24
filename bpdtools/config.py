@@ -28,3 +28,7 @@ BATTERY_CALL_TYPES = (
 )
 # Reckless driving calls.
 RECKLESS_CALL_TYPES = ("CFS 23103 - Reckless Vehicle",)
+
+# Incident_Type labels of the crime cases that count as assault. Matching is
+# exact: other labels such as "Domestic violence" are not included.
+ASSAULT_INCIDENT_TYPES = ("Assault/Battery Misdemeanor", "Assault/Battery Felony")
