@@ -10,7 +10,7 @@ from bpdtools.config import (
     NOISE_CALL_TYPES,
     RECKLESS_CALL_TYPES,
 )
-from bpdtools.crime import require_columns
+from bpdtools.crime import lat_lon_numbers, require_columns
 from bpdtools.paths import repo_path
 
 # Call groups and their exact Call Type labels. The label tuples in
@@ -24,11 +24,25 @@ CALL_GROUPS = {
 # Group of every Call Type that is in none of CALL_GROUPS, blanks included.
 OTHER_GROUP = "other"
 
-# Committed table that load_calls reads when no path is given.
+# Committed tables that the loaders read when no path is given.
 CALLS_TABLE = ("data", "processed", "calls_2021_2025.csv.gz")
+CASES_TABLE = ("data", "processed", "crime_cases_2021_2025.csv.gz")
 
 # Columns that load_calls needs in the Calls for Service table.
 CALL_COLUMNS = ("Incident Number", "CreateDatetime", "date", "Call Type")
+
+# Columns that load_cases needs in the crime cases table.
+CASE_TABLE_COLUMNS = (
+    "Case_Number",
+    "Occurred_Datetime",
+    "date",
+    "Incident_Type",
+    "lat",
+    "lon",
+)
+
+# Text format of Occurred_Datetime: local wall clock time, no UTC offset.
+CASE_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 def read_text_table(path):
@@ -139,3 +153,62 @@ def load_calls(path=None):
     # driving analyses.
     calls["call_group"] = classify_call_type(calls["Call Type"])
     return calls
+
+
+def load_cases(path=None):
+    """Read the 2021-2025 crime cases table with local times and map points.
+
+    Parameters
+    ----------
+    path : str or pathlib.Path, optional
+        CSV file to read. The default is
+        data/processed/crime_cases_2021_2025.csv.gz in the repository.
+
+    Returns
+    -------
+    pandas.DataFrame
+        One row per case with the columns of the file, where `date` is
+        datetime64 at local midnight, `lat` and `lon` are numbers (NaN when
+        blank), and `local_time` is the tz-naive local wall clock time of
+        Occurred_Datetime.
+
+    Raises
+    ------
+    KeyError
+        If a column of CASE_TABLE_COLUMNS is missing.
+    ValueError
+        If an Occurred_Datetime value does not match "YYYY-MM-DD HH:MM:SS",
+        if a date does not match it, or if a lat or lon value is not a number.
+    """
+    # Read the committed table unless the caller gives another file.
+    path = repo_path(*CASES_TABLE) if path is None else path
+    cases = read_text_table(path)
+    require_columns(cases, CASE_TABLE_COLUMNS, "crime cases")
+
+    # Time zone step: Occurred_Datetime is already local wall clock time
+    # without an offset, so it is parsed as it is, with no shift.
+    try:
+        cases["local_time"] = pd.to_datetime(
+            cases["Occurred_Datetime"], format=CASE_TIME_FORMAT
+        )
+    except ValueError as error:
+        raise ValueError(
+            "An Occurred_Datetime value does not match 'YYYY-MM-DD HH:MM:SS'. "
+            f"Rebuild the table with scripts/prepare_crime_cases.py. "
+            f"Details: {error}"
+        ) from error
+
+    # Check that the stored date is the date of Occurred_Datetime.
+    cases["date"] = pd.to_datetime(cases["date"], format=DATE_FORMAT)
+    wrong_date = cases["date"] != cases["local_time"].dt.normalize()
+    if wrong_date.any():
+        examples = cases.loc[wrong_date, "Case_Number"].head(3).tolist()
+        raise ValueError(
+            f"{int(wrong_date.sum())} cases have a date that is not the date "
+            f"of Occurred_Datetime, for example {examples}. Rebuild the table "
+            "with scripts/prepare_crime_cases.py."
+        )
+
+    # Read the map points as numbers; a blank point stays missing.
+    cases["lat"], cases["lon"] = lat_lon_numbers(cases, "crime cases")
+    return cases
