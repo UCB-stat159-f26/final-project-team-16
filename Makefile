@@ -20,11 +20,13 @@ env:
 test:
 	conda run --no-capture-output --name $(ENV_NAME) python -m pytest
 
-# Download the raw Calls for Service file, then rebuild the 2021-2025 table
-# from it. This target needs the internet; data/ is a folder, so the target
-# is phony.
+# Download the raw Calls for Service and crime cases files, then rebuild the
+# 2021-2025 tables from them. This target needs the internet; data/ is a
+# folder, so the target is phony.
 .PHONY: data
-## data: download the raw Calls for Service file and rebuild its table
+## data: download the raw Calls for Service and crime files and rebuild their tables
 data:
 	conda run --no-capture-output --name $(ENV_NAME) python scripts/download_calls.py
 	conda run --no-capture-output --name $(ENV_NAME) python scripts/prepare_calls.py
+	conda run --no-capture-output --name $(ENV_NAME) python scripts/download_crime_cases.py
+	conda run --no-capture-output --name $(ENV_NAME) python scripts/prepare_crime_cases.py
