@@ -4,6 +4,10 @@ import pandas as pd
 
 from bpdtools.config import LOCAL_TIME_ZONE
 
+# Columns that describe the case itself, so all statute rows of one case
+# must agree on them.
+CASE_COLUMNS = ("Occurred_Datetime", "Incident_Type", "Block_Address", "lat", "lon")
+
 
 def local_times_from_epoch(milliseconds):
     """Convert UTC epoch milliseconds to local date and time in Berkeley.
@@ -72,3 +76,60 @@ def require_columns(table, needed_columns, table_name):
             f"The {table_name} table has no column {missing_columns}. Pass a "
             f"table with all of the columns {list(needed_columns)}."
         )
+
+
+def one_row_per_case(rows):
+    """Keep one row per crime case, after checking that its rows agree.
+
+    The source has one row for each statute of a case. The case fields in
+    CASE_COLUMNS must be the same on every row of a case.
+
+    Parameters
+    ----------
+    rows : pandas.DataFrame
+        One row per case and statute. Must contain Case_Number and the
+        columns in CASE_COLUMNS.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The first row of each case, in the input order, with a new index
+        from 0. Has the same columns as `rows`.
+
+    Raises
+    ------
+    KeyError
+        If Case_Number or a column of CASE_COLUMNS is missing.
+    ValueError
+        If Case_Number is blank in a row, or if the rows of a case disagree on
+        a column of CASE_COLUMNS. The message names the first such case.
+    """
+    # Stop early with a clear message when a needed column is missing.
+    require_columns(rows, ["Case_Number", *CASE_COLUMNS], "crime")
+    # A row without a case number cannot be counted once per case.
+    blank_cases = rows["Case_Number"].isna()
+    if blank_cases.any():
+        raise ValueError(
+            f"Case_Number is blank in {blank_cases.sum()} rows. Remove those "
+            "rows before counting cases."
+        )
+    # Count the distinct values of each case column within each case. A
+    # missing value counts as a value, so a missing and a present value
+    # disagree too.
+    distinct = rows.groupby("Case_Number", sort=False)[list(CASE_COLUMNS)].nunique(
+        dropna=False
+    )
+    disagree = distinct > 1
+    if disagree.to_numpy().any():
+        # Report the first case in input order and the first bad column.
+        case_number = disagree.any(axis=1).idxmax()
+        column = disagree.loc[case_number].idxmax()
+        values = rows.loc[rows["Case_Number"] == case_number, column].unique()
+        raise ValueError(
+            f"Case {case_number} has different {column} values across its "
+            f"statute rows: {list(values)}. Correct the rows of this case, or "
+            "decide which value to keep, before calling one_row_per_case."
+        )
+    # Deduplication: all rows of a case agree on the case columns, so keeping
+    # the first row loses no case information.
+    return rows.drop_duplicates("Case_Number", keep="first").reset_index(drop=True)
