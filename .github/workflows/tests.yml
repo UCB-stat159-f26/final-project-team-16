@@ -1,0 +1,61 @@
+# Run the linter and the unit tests on every pull request and on every push
+# to main.
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Cancel an older run of the same pull request when a newer commit arrives.
+# Runs on main are never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# The workflow only reads the repository.
+permissions:
+  contents: read
+
+# Run each step in a login shell, so that the conda environment is active.
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      # Get the files of the commit under test.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Create the conda environment from environment.yml, so that ruff has
+      # the pinned version. The cache key includes a hash of the file.
+      - uses: mamba-org/setup-micromamba@f457c30a868e4760d3a6fcea5f25dc655b8edf39 # v3.2.1
+        with:
+          environment-file: environment.yml
+          cache-environment: true
+          init-shell: bash
+      # Run the same two checks as `make lint`, which calls conda, and this
+      # runner does not have conda.
+      - name: Check the code with ruff
+        run: |
+          ruff check --output-format=github .
+          ruff format --check .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # Get the files of the commit under test.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Create the conda environment from environment.yml, which also installs
+      # bpdtools from this folder. The cache key includes a hash of the file,
+      # so a change to environment.yml builds a new environment.
+      - uses: mamba-org/setup-micromamba@f457c30a868e4760d3a6fcea5f25dc655b8edf39 # v3.2.1
+        with:
+          environment-file: environment.yml
+          cache-environment: true
+          init-shell: bash
+      # Run pytest directly, because `make test` calls conda. pytest reads its
+      # settings from pyproject.toml.
+      - name: Run the unit tests
+        run: python -m pytest
