@@ -133,3 +133,42 @@ def one_row_per_case(rows):
     # Deduplication: all rows of a case agree on the case columns, so keeping
     # the first row loses no case information.
     return rows.drop_duplicates("Case_Number", keep="first").reset_index(drop=True)
+
+
+def lat_lon_numbers(table, table_name):
+    """Read the lat and lon columns of a table as numbers.
+
+    Parameters
+    ----------
+    table : pandas.DataFrame
+        Must contain lat and lon, as numbers or as text. Blank cells are
+        allowed.
+    table_name : str
+        Short name of the table for the error messages, for example "crime".
+
+    Returns
+    -------
+    latitudes : pandas.Series
+        lat as numbers, with the index of `table`. A blank cell gives NaN.
+    longitudes : pandas.Series
+        lon as numbers, with the index of `table`. A blank cell gives NaN.
+
+    Raises
+    ------
+    KeyError
+        If lat or lon is missing.
+    ValueError
+        If a lat or lon value is not a number.
+    """
+    # Stop early with a clear message when a point column is missing.
+    require_columns(table, ("lat", "lon"), table_name)
+    # Read the coordinates as numbers; a blank cell becomes NaN.
+    try:
+        latitudes = pd.to_numeric(table["lat"])
+        longitudes = pd.to_numeric(table["lon"])
+    except (TypeError, ValueError) as error:
+        raise ValueError(
+            f"lat and lon must be numbers or blank in the {table_name} table. "
+            f"Correct or remove the value that is not a number: {error}"
+        ) from error
+    return latitudes, longitudes
