@@ -10,6 +10,7 @@ import pytest
 from bpdtools.sectors import (
     EARTH_RADIUS_M,
     LOOKUP_COLUMNS,
+    assign_case_sectors,
     assign_sectors,
     attach_address_sectors,
     build_lookup,
@@ -425,3 +426,80 @@ def test_attach_address_sectors_rejects_a_missing_address_column():
     crime_cases = pd.DataFrame({"Block_Address": ["A ST"]})
     with pytest.raises(KeyError, match="address_column"):
         attach_address_sectors(crime_cases, make_lookup())
+
+
+def make_crime_cases():
+    """Build six crime cases that cover each sector source and status.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Columns Block_Address, lat, and lon as text, as in the crime cases
+        table, with the case numbers as the index.
+    """
+    # Cases 1 and 2 have their own point (in sector 1, and outside every
+    # beat). Cases 3 to 6 have no point: their address is assigned in the
+    # lookup, outside in the lookup, not in the lookup, or blank.
+    return pd.DataFrame(
+        {
+            "Block_Address": ["A ST", "A ST", "A ST", "B ST", "Z ST", None],
+            "lat": ["0.5", "5.0", None, None, None, None],
+            "lon": ["0.5", "5.0", None, None, None, None],
+        },
+        index=pd.Index(
+            [f"2024-0000000{position}" for position in range(1, 7)], name="Case_Number"
+        ),
+    )
+
+
+def test_assign_case_sectors_takes_point_then_address_then_none():
+    """Check the source, status, and Sector of each of the six cases."""
+    # Sector 1 is the left square; the lookup puts A ST in sector 2.
+    crime_cases = make_crime_cases()
+    result = assign_case_sectors(crime_cases, two_squares(), make_lookup())
+    assert result["sector_source"].tolist() == [
+        "own_point",
+        "own_point",
+        "address",
+        "address",
+        "none",
+        "none",
+    ]
+    assert result["sector_status"].tolist() == [
+        "assigned",
+        "outside",
+        "assigned",
+        "outside",
+        "unmatched",
+        "blank_address",
+    ]
+    # The own point wins over the address: case 1 is in sector 1, not 2,
+    # and case 2 does not fall back to the address.
+    assert result["Sector"].astype("string").tolist() == [
+        "1",
+        pd.NA,
+        "2",
+        pd.NA,
+        pd.NA,
+        pd.NA,
+    ]
+
+
+def test_assign_case_sectors_keeps_the_index_and_the_input():
+    """Check the Int64 Sector, the kept index, and the unchanged input."""
+    # The function must return a copy and leave the input table as it is.
+    crime_cases = make_crime_cases()
+    result = assign_case_sectors(crime_cases, two_squares(), make_lookup())
+    assert str(result["Sector"].dtype) == "Int64"
+    assert result.index.equals(crime_cases.index)
+    assert list(crime_cases.columns) == ["Block_Address", "lat", "lon"]
+
+
+def test_assign_case_sectors_rejects_a_point_that_is_not_a_number():
+    """Check that text in lat raises a ValueError that names lat and lon."""
+    # "unknown" cannot be read as a latitude.
+    crime_cases = pd.DataFrame(
+        {"Block_Address": ["A ST"], "lat": ["unknown"], "lon": ["0.5"]}
+    )
+    with pytest.raises(ValueError, match="lat and lon must be numbers"):
+        assign_case_sectors(crime_cases, two_squares(), make_lookup())
