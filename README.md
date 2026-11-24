@@ -39,3 +39,11 @@ conda activate bpd-rhythm
 ```
 
 `make env` creates the conda environment `bpd-rhythm` from `environment.yml`. If the environment already exists, the same command updates it to match the file. Run `make help` to list all targets.
+
+### Running the tests
+
+```bash
+make test
+```
+
+`make test` runs `python -m pytest` inside the `bpd-rhythm` environment. pytest reads its settings from `pyproject.toml`, runs the tests in `tests/`, and treats every warning as an error.

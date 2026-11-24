@@ -25,3 +25,8 @@ dependencies:
   - ruff=0.17
   # Website
   - mystmd=1.13
+  # The project's own package, installed from this folder in editable mode,
+  # so that `import bpdtools` works in the notebooks and the tests
+  - pip
+  - pip:
+      - -e .
