@@ -1,0 +1,138 @@
+description,status,reason,snapshot_count
+BMC 10.04.090: Emerging from alley or private driveway,other_pcf,Recorded primary factor does not explicitly identify alcohol.,3
+BMC 10.20.020: Obedience to traffic barriers/signs,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+BMC 14.24.040: Unsafely riding or driving on sidewalk,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+BMC 14.32.060: Bicycle right of way violation,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+BMC 14.68.130/131: Unsafely riding bicycles on sidewalk,other_pcf,Recorded primary factor does not explicitly identify alcohol.,9
+Other,unclear,"Other, code-only, or unspecified description.",129
+Other (14.68.120),unclear,"Other, code-only, or unspecified description.",1
+Other (21221.5),unclear,"Other, code-only, or unspecified description.",3
+Other (21228(b)),unclear,"Other, code-only, or unspecified description.",1
+Other (22359),unclear,"Other, code-only, or unspecified description.",1
+Other (22658(a)),unclear,"Other, code-only, or unspecified description.",1
+Other (23109(c)),unclear,"Other, code-only, or unspecified description.",1
+Unknown,unclear,"Other, code-only, or unspecified description.",8
+Unknown / Not Stated,unclear,"Other, code-only, or unspecified description.",355
+VC 21084(a): Driver entering highway must yield right-of-way,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21200(a): Bicyclist subject to all vehicle laws,other_pcf,Recorded primary factor does not explicitly identify alcohol.,3
+VC 21200.5: Cycling under influence of alcohol/drugs,unclear,Impairment indicated but alcohol not unambiguously specified.,6
+VC 21201(d): Failure to have illumination for bicyclist,other_pcf,Recorded primary factor does not explicitly identify alcohol.,12
+VC 21202(a): Bicyclist failure to ride on right edge,other_pcf,Recorded primary factor does not explicitly identify alcohol.,16
+VC 21205: Carrying articles on bicycle preventing control,other_pcf,Recorded primary factor does not explicitly identify alcohol.,3
+VC 21208(a): Bicyclist failure to use bike lane,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21208(b): Unsafe exit from bike lane,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21209: Vehicle driving in bike lane,other_pcf,Recorded primary factor does not explicitly identify alcohol.,2
+VC 21223: Motorized scooter - Lights required,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21235(g): Electric scooter - Operating under influence,unclear,Impairment indicated but alcohol not unambiguously specified.,20
+VC 21235: Electric scooter violations,other_pcf,Recorded primary factor does not explicitly identify alcohol.,4
+VC 21294(a): Electrically motorized boards restricted to roads <=35 mph,other_pcf,Recorded primary factor does not explicitly identify alcohol.,2
+VC 21294(c): Operating electrically motorized board at unsafe speed,other_pcf,Recorded primary factor does not explicitly identify alcohol.,5
+VC 21367(b): Disobeying person directing traffic,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21451(a): Green light right-of-way violation,other_pcf,Recorded primary factor does not explicitly identify alcohol.,20
+VC 21451(b): Green arrow right-of-way violation,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21451(c): Pedestrian failure to yield at green light,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21453(a): Failure to stop at red light or stop line,other_pcf,Recorded primary factor does not explicitly identify alcohol.,702
+VC 21453(b): Unsafe turn on red after stopping,other_pcf,Recorded primary factor does not explicitly identify alcohol.,8
+VC 21453(c): Red arrow violation,other_pcf,Recorded primary factor does not explicitly identify alcohol.,2
+VC 21453(d): Pedestrian crossing against red light,other_pcf,Recorded primary factor does not explicitly identify alcohol.,8
+VC 21456(b): Failure to yield at traffic sign/signal,other_pcf,Recorded primary factor does not explicitly identify alcohol.,40
+VC 21456.2(a): Failure to yield at intersection,other_pcf,Recorded primary factor does not explicitly identify alcohol.,7
+VC 21457(a): Not following flashing yellow (caution) signal,other_pcf,Recorded primary factor does not explicitly identify alcohol.,41
+VC 21457(c): Failure to obey flashing red signal,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21457: Failure to obey flashing signal,other_pcf,Recorded primary factor does not explicitly identify alcohol.,3
+VC 21460(a): Vehicle crossing double solid line,other_pcf,Recorded primary factor does not explicitly identify alcohol.,42
+VC 21460: Double solid line violation,other_pcf,Recorded primary factor does not explicitly identify alcohol.,4
+VC 21461(a): Driver failure to obey traffic sign/signal,other_pcf,Recorded primary factor does not explicitly identify alcohol.,17
+VC 21461.5: Pedestrian failure to obey traffic sign/signal,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21462: Failure to obey traffic control regulations,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21650.1: Bicycle operating on wrong side of road,other_pcf,Recorded primary factor does not explicitly identify alcohol.,40
+VC 21650.5: Driving on designated bicycle path,other_pcf,Recorded primary factor does not explicitly identify alcohol.,4
+VC 21650: Failure to drive on right half of roadway,other_pcf,Recorded primary factor does not explicitly identify alcohol.,66
+VC 21651(a): Divided highway: Illegal crossing or U-turn,other_pcf,Recorded primary factor does not explicitly identify alcohol.,20
+VC 21651(b): Driving wrong way on divided highway,other_pcf,Recorded primary factor does not explicitly identify alcohol.,18
+VC 21651(c): Causing injury on divided highway (wrong way),other_pcf,Recorded primary factor does not explicitly identify alcohol.,2
+VC 21651: Divided highway violations,other_pcf,Recorded primary factor does not explicitly identify alcohol.,7
+VC 21657: Driving wrong way on one-way street,other_pcf,Recorded primary factor does not explicitly identify alcohol.,15
+VC 21658(a): Unsafe lane change,other_pcf,Recorded primary factor does not explicitly identify alcohol.,220
+VC 21660: Failure to yield on narrow roadway,other_pcf,Recorded primary factor does not explicitly identify alcohol.,2
+VC 21661: Failure to yield right-of-way on narrow grades,other_pcf,Recorded primary factor does not explicitly identify alcohol.,2
+VC 21663: Driving on sidewalk,other_pcf,Recorded primary factor does not explicitly identify alcohol.,18
+VC 21703: Following too closely (Tailgating),other_pcf,Recorded primary factor does not explicitly identify alcohol.,206
+VC 21705: Caravan/Motorcade separation,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21706: Following emergency vehicle too closely,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21750: Unsafe overtaking or passing on left,other_pcf,Recorded primary factor does not explicitly identify alcohol.,101
+VC 21751: Passing without sufficient clearance,other_pcf,Recorded primary factor does not explicitly identify alcohol.,16
+VC 21752(a): Passing on curve/hill with obstructed view,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21752(d): Passing at intersection,other_pcf,Recorded primary factor does not explicitly identify alcohol.,5
+VC 21752: Overtaking/Passing on grades/curves,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21754: Passing on the right,other_pcf,Recorded primary factor does not explicitly identify alcohol.,17
+VC 21755: Unsafe passing on right,other_pcf,Recorded primary factor does not explicitly identify alcohol.,62
+VC 21760(b): Passing bicycle w/o 3ft clearance (Driver),other_pcf,Recorded primary factor does not explicitly identify alcohol.,9
+VC 21760(c): Passing bicycle w/o 3ft clearance (Distance),other_pcf,Recorded primary factor does not explicitly identify alcohol.,5
+VC 21760: Three Feet for Safety Act,other_pcf,Recorded primary factor does not explicitly identify alcohol.,6
+VC 21800(a): Failure to yield at intersection (uncontrolled),other_pcf,Recorded primary factor does not explicitly identify alcohol.,73
+VC 21800(b): Failure to yield right-of-way when entering highway,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21800(d): Failure to yield at inactive traffic signal,other_pcf,Recorded primary factor does not explicitly identify alcohol.,7
+VC 21801(a): Failure to yield before left turn or U-turn,other_pcf,Recorded primary factor does not explicitly identify alcohol.,746
+VC 21801(b): Failure to yield to left-turning vehicle,other_pcf,Recorded primary factor does not explicitly identify alcohol.,15
+VC 21802(a): Failure to yield when entering through highway,other_pcf,Recorded primary factor does not explicitly identify alcohol.,959
+VC 21802(b): Failure to yield when entering through intersection,other_pcf,Recorded primary factor does not explicitly identify alcohol.,7
+VC 21803(a): Failure to yield at yield sign,other_pcf,Recorded primary factor does not explicitly identify alcohol.,8
+VC 21804(a): Failure to yield to traffic when entering highway,other_pcf,Recorded primary factor does not explicitly identify alcohol.,284
+VC 21806(a): Failure to yield to emergency vehicle,other_pcf,Recorded primary factor does not explicitly identify alcohol.,15
+VC 21950(a)(b): Driver yield fail; Pedestrian sudden entry,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21950(a): Failure to yield to pedestrian in crosswalk,other_pcf,Recorded primary factor does not explicitly identify alcohol.,978
+VC 21950(b): Pedestrian suddenly entering path of vehicle,other_pcf,Recorded primary factor does not explicitly identify alcohol.,69
+VC 21950(c): Pedestrian slowing traffic unnecessarily,other_pcf,Recorded primary factor does not explicitly identify alcohol.,9
+VC 21951: Overtaking vehicle stopped for pedestrian,other_pcf,Recorded primary factor does not explicitly identify alcohol.,15
+VC 21952: Failure to yield to pedestrian on sidewalk,other_pcf,Recorded primary factor does not explicitly identify alcohol.,8
+VC 21954(a): Pedestrian failure to yield right-of-way outside crosswalk,other_pcf,Recorded primary factor does not explicitly identify alcohol.,129
+VC 21954(b): Driver failure to exercise due care for pedestrian,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21955: Crossing between intersections (Jaywalking),other_pcf,Recorded primary factor does not explicitly identify alcohol.,27
+VC 21956(a): Pedestrian walking on left edge of roadway,other_pcf,Recorded primary factor does not explicitly identify alcohol.,10
+VC 21963: Failure to yield to visually impaired pedestrian,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 21968: Motorized skateboard prohibited on sidewalks/roads,other_pcf,Recorded primary factor does not explicitly identify alcohol.,4
+VC 22100(a): Improper right turn position,other_pcf,Recorded primary factor does not explicitly identify alcohol.,32
+VC 22100(b): Improper left turn position,other_pcf,Recorded primary factor does not explicitly identify alcohol.,29
+VC 22100.5: U-turn at intersection,other_pcf,Recorded primary factor does not explicitly identify alcohol.,2
+VC 22100: Turning position regulations,other_pcf,Recorded primary factor does not explicitly identify alcohol.,5
+VC 22101(d): Disobeying official traffic control device (turns),other_pcf,Recorded primary factor does not explicitly identify alcohol.,16
+VC 22101: Disobeying official traffic control device (turns),other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 22102: U-turn in business district,other_pcf,Recorded primary factor does not explicitly identify alcohol.,13
+VC 22103(a): U-turn in residence district,other_pcf,Recorded primary factor does not explicitly identify alcohol.,11
+VC 22105: Unsafe U-turn with obstructed view,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 22106: Unsafe starting or backing of vehicle on highway,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1622
+VC 22107: Unsafe turning or moving of vehicle on roadway,other_pcf,Recorded primary factor does not explicitly identify alcohol.,3519
+VC 22109: Failure to signal when stopping/slowing,other_pcf,Recorded primary factor does not explicitly identify alcohol.,3
+VC 22350: Unsafe speed for prevailing conditions,other_pcf,Recorded primary factor does not explicitly identify alcohol.,3875
+VC 22355: Failure to abide by speed limit,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 22450(a): Failure to stop at stop sign or limit line,other_pcf,Recorded primary factor does not explicitly identify alcohol.,394
+VC 22454: Passing school bus with flashing red lights,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 22500(a): Parking within intersection,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 22515: Unattended vehicle (parking brake violation),other_pcf,Recorded primary factor does not explicitly identify alcohol.,27
+VC 22517: Opening vehicle door into traffic (Dooring),other_pcf,Recorded primary factor does not explicitly identify alcohol.,272
+VC 22526(a): Blocking intersection (Anti-Gridlock),other_pcf,Recorded primary factor does not explicitly identify alcohol.,3
+VC 22703: Abandoned vehicle,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 23103(a): Reckless driving on highway,other_pcf,Recorded primary factor does not explicitly identify alcohol.,22
+VC 23103(b): Reckless driving in off-street parking,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 23104(a): Reckless driving causing bodily injury,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 23110: Throwing substance at vehicle,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 23114(a): Driving vehicle with unsecured load,other_pcf,Recorded primary factor does not explicitly identify alcohol.,2
+VC 23123(a): Using wireless phone while driving,other_pcf,Recorded primary factor does not explicitly identify alcohol.,7
+VC 23123.5: Texting while driving,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 23140(a): DUI under 21 years old (0.05% BAC),explicit_alcohol,Description explicitly identifies alcohol or a BAC threshold.,2
+VC 23152(a)(b): DUI Alcohol; DUI with BAC 0.08%+,explicit_alcohol,Description explicitly identifies alcohol or a BAC threshold.,4
+VC 23152(a): Driving under the influence of alcohol,explicit_alcohol,Description explicitly identifies alcohol or a BAC threshold.,784
+VC 23152(b): DUI with 0.08% BAC or higher,explicit_alcohol,Description explicitly identifies alcohol or a BAC threshold.,7
+VC 23152(e): DUI passenger for hire,unclear,Impairment indicated but alcohol not unambiguously specified.,19
+VC 23152(f): Driving under the influence of drugs,drug_only_label,Description specifies drugs only.,64
+VC 23152(g): DUI Combined alcohol and drugs,explicit_alcohol,Description explicitly identifies alcohol or a BAC threshold.,23
+VC 23153(a)(b): DUI causing injury; DUI 0.08% BAC causing injury,explicit_alcohol,Description explicitly identifies alcohol or a BAC threshold.,5
+VC 23153(a): DUI alcohol causing injury,explicit_alcohol,Description explicitly identifies alcohol or a BAC threshold.,132
+VC 23153(f): DUI drugs causing injury,drug_only_label,Description specifies drugs only.,16
+VC 23153(g): DUI combined causing injury,unclear,Impairment indicated but alcohol not unambiguously specified.,1
+VC 24002: Unlawful operation of vehicle (unsafe condition),other_pcf,Recorded primary factor does not explicitly identify alcohol.,9
+VC 24250: Driving without lights during darkness,other_pcf,Recorded primary factor does not explicitly identify alcohol.,2
+VC 26451(b): Parking brake requirements,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 2800.1: Evading a peace officer,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
+VC 38280: Traffic control devices on public lands,other_pcf,Recorded primary factor does not explicitly identify alcohol.,1
