@@ -17,4 +17,5 @@ def test_coverage_and_campus_definitions():
     assert primary.loc[("near", "winter_break"), "semester_to_break_ratio"] == 1
     assert broader.loc[("near", "semester"), "semester_to_break_ratio"] == 2
     assert pd.isna(primary.loc[("other", "semester"), "semester_to_break_ratio"])
+    assert audit.index.name == "period"
     assert audit.loc["semester", "unassigned_share"] == 1 / 3
