@@ -2,10 +2,15 @@
 
 import json
 
+import numpy as np
 import pandas as pd
 import pytest
 
-from bpdtools.sectors import load_sector_features, normalize_block_address
+from bpdtools.sectors import (
+    assign_sectors,
+    load_sector_features,
+    normalize_block_address,
+)
 
 
 def test_normalize_block_address_collapses_spaces_and_upper_cases():
@@ -179,3 +184,67 @@ def test_load_sector_features_rejects_a_missing_file(tmp_path):
     # The folder is empty, so the file does not exist.
     with pytest.raises(FileNotFoundError, match="Beats file not found"):
         load_sector_features(tmp_path / "beats.geojson")
+
+
+def test_assign_sectors_labels_inside_and_outside_points():
+    """Check that a point in a square gets its sector and a far point does not."""
+    # (0.5, 0.5) is in sector 1, (1.5, 0.5) in sector 2, (5, 5) in neither.
+    labels = assign_sectors([0.5, 1.5, 5.0], [0.5, 0.5, 5.0], two_squares())
+    assert labels.tolist() == ["1", "2", "outside"]
+
+
+def test_assign_sectors_marks_exact_edge_points_ambiguous():
+    """Check that points on a shared edge and on an outer edge are ambiguous."""
+    # (1, 0.5) is on the edge between the squares; (0, 0.5) is on the outer
+    # edge of sector 1 only.
+    labels = assign_sectors([1.0, 0.0], [0.5, 0.5], two_squares())
+    assert labels.tolist() == ["ambiguous", "ambiguous"]
+
+
+def test_assign_sectors_finds_edges_of_clockwise_rings():
+    """Check that the edge test does not depend on the ring direction."""
+    # The same square as sector 1, with its vertices in clockwise order.
+    features = [polygon_feature("1", square(0, 0, clockwise=True))]
+    labels = assign_sectors([0.5, 1.0], [0.5, 0.5], features)
+    assert labels.tolist() == ["1", "ambiguous"]
+
+
+def test_assign_sectors_marks_missing_points():
+    """Check that a missing or infinite coordinate gives the label "missing"."""
+    # One point without a longitude, one with an infinite latitude.
+    labels = assign_sectors([np.nan, 0.5], [0.5, np.inf], two_squares())
+    assert labels.tolist() == ["missing", "missing"]
+
+
+def test_assign_sectors_uses_every_polygon_of_a_multipolygon():
+    """Check that a point in the second polygon of a MultiPolygon gets its sector."""
+    # Sector 3 has two separate squares; the second one starts at x = 3.
+    split_beat = {
+        "type": "Feature",
+        "properties": {"Sector": 3},
+        "geometry": {
+            "type": "MultiPolygon",
+            "coordinates": [[square(0, 0)], [square(3, 0)]],
+        },
+    }
+    labels = assign_sectors([0.5, 3.5, 2.0], [0.5, 0.5, 0.5], [split_beat])
+    assert labels.tolist() == ["3", "3", "outside"]
+
+
+def test_assign_sectors_leaves_out_points_in_holes_and_overlaps():
+    """Check that a hole is outside and a point in two polygons is ambiguous."""
+    # Sector 1 is a 4 by 4 square with a hole from 1 to 2; sector 2 overlaps
+    # sector 1 on the square from 3 to 4.
+    features = [
+        polygon_feature("1", square(0, 0, size=4), square(1, 1)),
+        polygon_feature("2", square(3, 3)),
+    ]
+    labels = assign_sectors([1.5, 0.5, 3.5], [1.5, 0.5, 3.5], features)
+    assert labels.tolist() == ["outside", "1", "ambiguous"]
+
+
+def test_assign_sectors_rejects_lon_and_lat_of_different_length():
+    """Check that two longitudes and one latitude raise a ValueError."""
+    # Each point needs one longitude and one latitude.
+    with pytest.raises(ValueError, match="one longitude and one latitude"):
+        assign_sectors([0.5, 1.5], [0.5], two_squares())
