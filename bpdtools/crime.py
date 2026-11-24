@@ -1,4 +1,6 @@
-"""Functions that clean the BPD crime cases data."""
+"""Functions that read and clean the BPD crime cases data."""
+
+import os
 
 import pandas as pd
 
@@ -8,6 +10,7 @@ from bpdtools.config import (
     PLACEHOLDER_LAT,
     PLACEHOLDER_LON,
 )
+from bpdtools.paths import repo_path
 
 # Columns that describe the case itself, so all statute rows of one case
 # must agree on them.
@@ -15,6 +18,9 @@ CASE_COLUMNS = ("Occurred_Datetime", "Incident_Type", "Block_Address", "lat", "l
 
 # Columns that clear_placeholder_points reads.
 POINT_COLUMNS = ("Block_Address", "lat", "lon")
+
+# The layer writes this code in lat and lon when a case has no map point.
+NO_POINT_CODE = -361
 
 
 def local_times_from_epoch(milliseconds):
@@ -228,3 +234,66 @@ def clear_placeholder_points(cases):
     cleared = cases.copy()
     cleared.loc[to_clear, ["lat", "lon"]] = None
     return cleared
+
+
+def read_raw_cases(path, needed_columns):
+    """Read the downloaded crime cases file and blank the no-point code.
+
+    Parameters
+    ----------
+    path : pathlib.Path
+        Location of the downloaded CSV file.
+    needed_columns : list of str
+        Columns that the caller uses. Each one must be in the file. lat and
+        lon are always needed, also when they are not in this list.
+
+    Returns
+    -------
+    pandas.DataFrame
+        One row per case and statute, every column as text. Empty cells are
+        missing values; all other cells, including the text "None", are kept
+        as they are. lat and lon are missing where the layer wrote
+        NO_POINT_CODE.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the file does not exist.
+    ValueError
+        If a column of `needed_columns`, lat, or lon is missing from the
+        file, or if a lat or lon value is not a number.
+    """
+    # Show the path relative to the repository root in error messages.
+    shown_path = os.path.relpath(path, repo_path())
+    # Stop early with a fix when the raw download is not there.
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Raw file not found: {shown_path}. Run "
+            "`python scripts/download_crime_cases.py` from the repository root "
+            "first."
+        )
+    # Only an empty cell is missing, so that a label such as "None" stays text.
+    rows = pd.read_csv(path, dtype=str, keep_default_na=False, na_values=[""])
+    # Make sure every column that the caller uses, and the point, is present.
+    needed = {*needed_columns, "lat", "lon"}
+    absent = sorted(column for column in needed if column not in rows.columns)
+    if absent:
+        raise ValueError(
+            f"Columns {absent} are missing from {shown_path}. Download the file "
+            "again with `python scripts/download_crime_cases.py`."
+        )
+    # Read the coordinates as numbers; a value that is not a number stops.
+    # The raw file is kept as the layer returns it, so the fix is a new
+    # download, not an edit of the value.
+    try:
+        latitudes, longitudes = lat_lon_numbers(rows, "downloaded crime cases")
+    except ValueError as error:
+        raise ValueError(
+            f"A lat or lon value in {shown_path} is not a number. Download the "
+            "file again with `python scripts/download_crime_cases.py`."
+        ) from error
+    # -361 is the layer's code for "no map point", not a place. Make it a
+    # missing value, so that it cannot be read as a coordinate.
+    has_no_point = (latitudes == NO_POINT_CODE) | (longitudes == NO_POINT_CODE)
+    rows.loc[has_no_point, ["lat", "lon"]] = None
+    return rows
