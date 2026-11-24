@@ -2,11 +2,19 @@
 
 import pandas as pd
 
-from bpdtools.config import LOCAL_TIME_ZONE
+from bpdtools.config import (
+    HEADQUARTERS_ADDRESS,
+    LOCAL_TIME_ZONE,
+    PLACEHOLDER_LAT,
+    PLACEHOLDER_LON,
+)
 
 # Columns that describe the case itself, so all statute rows of one case
 # must agree on them.
 CASE_COLUMNS = ("Occurred_Datetime", "Incident_Type", "Block_Address", "lat", "lon")
+
+# Columns that clear_placeholder_points reads.
+POINT_COLUMNS = ("Block_Address", "lat", "lon")
 
 
 def local_times_from_epoch(milliseconds):
@@ -172,3 +180,51 @@ def lat_lon_numbers(table, table_name):
             f"Correct or remove the value that is not a number: {error}"
         ) from error
     return latitudes, longitudes
+
+
+def clear_placeholder_points(cases):
+    """Remove the headquarters point from cases at another address.
+
+    The layer gives many cases the map point of police headquarters
+    (PLACEHOLDER_LAT, PLACEHOLDER_LON), also when the case address is
+    elsewhere. For those cases the point is a placeholder, not the place of
+    the case. A case whose address is HEADQUARTERS_ADDRESS keeps the point.
+
+    Parameters
+    ----------
+    cases : pandas.DataFrame
+        Must contain Block_Address, lat, and lon. lat and lon can be numbers
+        or text. Missing values are allowed in all three columns.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A copy of `cases` in which lat and lon are missing for each case at
+        the placeholder point with another or a blank address. All other
+        values are unchanged.
+
+    Raises
+    ------
+    KeyError
+        If Block_Address, lat, or lon is missing.
+    ValueError
+        If a lat or lon value is not a number.
+    """
+    # Stop early with a clear message when a needed column is missing.
+    require_columns(cases, POINT_COLUMNS, "crime")
+    # Read the coordinates as numbers; missing values become NaN.
+    latitudes, longitudes = lat_lon_numbers(cases, "crime")
+    # Exact equality is safe: the layer writes the placeholder with the same
+    # digits every time, so the parsed numbers equal the constants.
+    at_placeholder = (latitudes == PLACEHOLDER_LAT) & (longitudes == PLACEHOLDER_LON)
+    # Compare addresses in upper case with single spaces and no spaces at
+    # the ends, because the layer sometimes writes two spaces in a row.
+    addresses = cases["Block_Address"].astype("string").str.upper()
+    addresses = addresses.str.split().str.join(" ")
+    at_headquarters = (addresses == HEADQUARTERS_ADDRESS).fillna(False).astype(bool)
+    # Filter: clear the point only at another address. A blank address
+    # cannot show that the case was at headquarters, so it is cleared too.
+    to_clear = at_placeholder & ~at_headquarters
+    cleared = cases.copy()
+    cleared.loc[to_clear, ["lat", "lon"]] = None
+    return cleared
