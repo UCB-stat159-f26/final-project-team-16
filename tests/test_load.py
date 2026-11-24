@@ -3,6 +3,7 @@
 import pandas as pd
 import pytest
 
+from bpdtools.config import ANALYSIS_END, ANALYSIS_START
 from bpdtools.load import (
     classify_call_type,
     load_calls,
@@ -149,3 +150,25 @@ def test_load_cases_rejects_a_point_that_is_not_a_number(tmp_path):
     text = CASE_HEADER + "k1,2024-11-03 01:30:00,2024-11-03,Vandalism,north,-122.27\n"
     with pytest.raises(ValueError, match="numbers or blank"):
         load_cases(write_table(tmp_path, "cases.csv", text))
+
+
+def test_load_calls_reads_the_committed_table_in_full():
+    """Check row count, unique IDs, and the window of the committed calls table."""
+    calls = load_calls()
+    # 307,628 calls in 2021-2025, one row per Incident Number, all dated.
+    assert len(calls) == 307_628
+    assert calls["Incident Number"].is_unique
+    assert calls["local_time"].notna().all()
+    assert calls["local_time"].min() >= pd.Timestamp(ANALYSIS_START)
+    assert calls["local_time"].max() < pd.Timestamp(ANALYSIS_END) + pd.Timedelta(days=1)
+
+
+def test_load_cases_reads_the_committed_table_in_full():
+    """Check row count, unique IDs, and the window of the committed cases table."""
+    cases = load_cases()
+    # 51,418 cases in 2021-2025, one row per Case_Number, all dated.
+    assert len(cases) == 51_418
+    assert cases["Case_Number"].is_unique
+    assert cases["local_time"].notna().all()
+    assert cases["local_time"].min() >= pd.Timestamp(ANALYSIS_START)
+    assert cases["local_time"].max() < pd.Timestamp(ANALYSIS_END) + pd.Timedelta(days=1)
