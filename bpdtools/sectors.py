@@ -1,4 +1,4 @@
-"""Place map points, block addresses, and calls in police beat sectors.
+"""Place block addresses, calls, and crime cases in police beat sectors.
 
 normalize_block_address turns block addresses into keys that match across
 tables.
@@ -9,6 +9,8 @@ haversine_m measures the distance between two map points.
 build_lookup gives each address key one map point and its sector.
 attach_address_sectors gives each call the sector of its block address from
 data/processed/address_sectors.csv.
+assign_case_sectors gives each crime case the sector of its own map point,
+or of its block address when the case has no point.
 """
 
 import json
@@ -55,7 +57,8 @@ LOOKUP_COLUMNS = (
     "sector_status",
 )
 
-# Columns of the crime cases that build_lookup reads.
+# Columns of the crime cases that build_lookup and assign_case_sectors
+# read.
 CASE_LOCATION_COLUMNS = ("Block_Address", "lat", "lon")
 
 # Values of sector_status in the lookup table: a label of assign_sectors for
@@ -65,6 +68,13 @@ LOOKUP_STATUSES = ("assigned", *NO_SECTOR_LABELS)
 # Columns that attach_address_sectors adds to the events, and that the
 # lookup table must have.
 ADDRESS_SECTOR_COLUMNS = ("block_key", "Sector", "sector_status")
+
+# Columns that assign_case_sectors adds to the crime cases.
+CASE_SECTOR_COLUMNS = ("Sector", "sector_source", "sector_status")
+
+# Statuses of attach_address_sectors for an address that has a map point in
+# the lookup table.
+ADDRESS_POINT_STATUSES = ("assigned", "outside", "ambiguous")
 
 
 def address_key(address):
@@ -492,4 +502,96 @@ def attach_address_sectors(events, lookup, address_column="Block Address"):
     event_status = event_status.mask(event_status.isna(), "unmatched")
     event_status = event_status.mask(result["block_key"].isna(), "blank_address")
     result["sector_status"] = event_status.astype("str")
+    return result
+
+
+def assign_case_sectors(cases, features, lookup):
+    """Give each crime case the police beat sector of its point or address.
+
+    A case with a valid map point gets the sector of its own point, even when
+    that point is outside every beat. Only a case without a valid point (lat
+    or lon missing) gets the sector of its block address from the lookup
+    table, in the way of attach_address_sectors.
+
+    Parameters
+    ----------
+    cases : pandas.DataFrame
+        One row per crime case, for example the table read from
+        data/processed/crime_cases_2021_2025.csv.gz. Must contain
+        Block_Address, lat, and lon. lat and lon can be numbers or text.
+    features : list of dict
+        GeoJSON beat features from load_sector_features.
+    lookup : pandas.DataFrame
+        The table read from data/processed/address_sectors.csv.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A copy of `cases`, with the same index, and three new columns.
+        Sector is pandas Int64, <NA> unless sector_status is "assigned".
+        sector_source is "own_point" when the case has a valid point; then
+        sector_status is "assigned", "outside", or "ambiguous" for that
+        point. sector_source is "address" when the case has no valid point
+        and the lookup has a point for its address; then sector_status is
+        "assigned", "outside", or "ambiguous" for the address point.
+        sector_source is "none" when the case has neither; then
+        sector_status is "no_point", "unmatched", or "blank_address", as in
+        attach_address_sectors.
+
+    Raises
+    ------
+    KeyError
+        If Block_Address, lat, or lon is missing, or a lookup column is
+        missing.
+    ValueError
+        If `cases` already has one of the new columns, if a lat or lon value
+        is not a number, or if the lookup breaks a rule of
+        attach_address_sectors.
+    TypeError
+        If a Block_Address value is not text.
+    """
+    # Stop early with a clear message when a needed column is missing.
+    require_columns(cases, CASE_LOCATION_COLUMNS, "crime cases")
+    taken_columns = [
+        column for column in CASE_SECTOR_COLUMNS if column in cases.columns
+    ]
+    if taken_columns:
+        raise ValueError(
+            f"cases already has the columns {taken_columns}. Drop them before "
+            "assigning sectors again."
+        )
+    # Read the coordinates as numbers; a blank cell becomes NaN.
+    latitudes, longitudes = lat_lon_numbers(cases, "crime cases")
+
+    # Place each case by its own point. A case without a valid point gets
+    # the label "missing".
+    point_labels = pd.Series(
+        assign_sectors(longitudes, latitudes, features), index=cases.index
+    )
+    has_point = point_labels != "missing"
+    is_sector = ~point_labels.isin(NO_SECTOR_LABELS)
+    point_sector = pd.to_numeric(point_labels.where(is_sector)).astype("Int64")
+    point_status = point_labels.where(~is_sector, "assigned")
+
+    # Look up the address of every case. Only the cases without a valid
+    # point use this result.
+    by_address = attach_address_sectors(
+        cases[["Block_Address"]], lookup, address_column="Block_Address"
+    )
+
+    # Fallback rule: keep the own point when there is one, else the address.
+    result = cases.copy()
+    result["Sector"] = point_sector.where(has_point, by_address["Sector"])
+    # Source: the own point, the address point, or none when the address has
+    # no point in the lookup (no_point, unmatched, or blank_address).
+    has_address_point = by_address["sector_status"].isin(ADDRESS_POINT_STATUSES)
+    sector_source = np.select(
+        [has_point.to_numpy(), has_address_point.to_numpy()],
+        ["own_point", "address"],
+        default="none",
+    )
+    result["sector_source"] = pd.Series(sector_source, index=cases.index).astype("str")
+    result["sector_status"] = point_status.where(
+        has_point, by_address["sector_status"]
+    ).astype("str")
     return result
