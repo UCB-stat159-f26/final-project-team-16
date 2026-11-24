@@ -1,4 +1,4 @@
-"""Place map points and block addresses in police beat sectors.
+"""Place map points, block addresses, and calls in police beat sectors.
 
 normalize_block_address turns block addresses into keys that match across
 tables.
@@ -7,6 +7,8 @@ data/boundaries/police_beats.geojson.
 assign_sectors places map points in these polygons.
 haversine_m measures the distance between two map points.
 build_lookup gives each address key one map point and its sector.
+attach_address_sectors gives each call the sector of its block address from
+data/processed/address_sectors.csv.
 """
 
 import json
@@ -55,6 +57,14 @@ LOOKUP_COLUMNS = (
 
 # Columns of the crime cases that build_lookup reads.
 CASE_LOCATION_COLUMNS = ("Block_Address", "lat", "lon")
+
+# Values of sector_status in the lookup table: a label of assign_sectors for
+# a point without a sector, or "assigned" when the point is in one sector.
+LOOKUP_STATUSES = ("assigned", *NO_SECTOR_LABELS)
+
+# Columns that attach_address_sectors adds to the events, and that the
+# lookup table must have.
+ADDRESS_SECTOR_COLUMNS = ("block_key", "Sector", "sector_status")
 
 
 def address_key(address):
@@ -386,3 +396,100 @@ def build_lookup(cases, features, box=BERKELEY_BOX):
     lookup["Sector"] = pd.to_numeric(labels.where(is_sector)).astype("Int64")
     lookup["sector_status"] = labels.where(~is_sector, "assigned")
     return lookup.reset_index()[list(LOOKUP_COLUMNS)]
+
+
+def attach_address_sectors(events, lookup, address_column="Block Address"):
+    """Give each event the police beat sector of its block address.
+
+    Parameters
+    ----------
+    events : pandas.DataFrame
+        One row per call or case. Must contain `address_column`.
+    lookup : pandas.DataFrame
+        The table read from data/processed/address_sectors.csv, with the
+        columns block_key, Sector, and sector_status and one row per
+        block_key.
+    address_column : str, default "Block Address"
+        Name of the block address column of `events`. Use "Block_Address"
+        for the crime cases table.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A copy of `events`, with the same index, and three new columns:
+        block_key (the normalized address), Sector (pandas Int64, <NA> unless
+        the status is "assigned"), and sector_status. The status is
+        "assigned", "outside", or "ambiguous" as in the lookup, "no_point"
+        when the lookup has the address but no map point for it, "unmatched"
+        when the address is not in the lookup, and "blank_address" when the
+        address is blank or missing.
+
+    Raises
+    ------
+    KeyError
+        If `address_column` is not in `events`, or a lookup column is missing.
+    ValueError
+        If `events` already has one of the new columns, if a block_key of the
+        lookup is blank or repeated, if a sector_status is unknown, or if
+        Sector is filled for a row that is not "assigned" (or the reverse).
+    TypeError
+        If an address of `events` is not text.
+    """
+    # Check the columns of both tables.
+    if address_column not in events.columns:
+        raise KeyError(
+            f"events has no column {address_column!r}. Pass the name of its "
+            "block address column as address_column."
+        )
+    require_columns(lookup, ADDRESS_SECTOR_COLUMNS, "lookup")
+    taken_columns = [
+        column for column in ADDRESS_SECTOR_COLUMNS if column in events.columns
+    ]
+    if taken_columns:
+        raise ValueError(
+            f"events already has the columns {taken_columns}. Drop them before "
+            "attaching sectors again."
+        )
+    # Deduplication check: each lookup key must be present and appear once,
+    # so that every event matches at most one row.
+    lookup_keys = lookup["block_key"]
+    if lookup_keys.isna().any() or lookup_keys.duplicated().any():
+        raise ValueError(
+            "lookup has a blank or repeated block_key. Rebuild it with "
+            "`python scripts/prepare_address_sectors.py`."
+        )
+    # Every status must be one of LOOKUP_STATUSES.
+    lookup_status = lookup["sector_status"]
+    unknown = sorted(set(lookup_status) - set(LOOKUP_STATUSES), key=str)
+    if unknown:
+        raise ValueError(
+            f"lookup has unknown sector_status values {unknown}. Allowed values "
+            f"are {list(LOOKUP_STATUSES)}."
+        )
+    # A CSV read gives Sector as float with NaN; store it as whole numbers
+    # with <NA>.
+    lookup_sector = pd.to_numeric(lookup["Sector"]).astype("Int64")
+    if (lookup_sector.notna() != (lookup_status == "assigned")).any():
+        raise ValueError(
+            "lookup must have a Sector exactly on the rows whose sector_status "
+            "is 'assigned'. Rebuild it with "
+            "`python scripts/prepare_address_sectors.py`."
+        )
+
+    # Normalize the event addresses with the rule that built the lookup keys.
+    result = events.copy()
+    result["block_key"] = normalize_block_address(result[address_column])
+    # Look up each key with map, which keeps the index and the row count.
+    key_index = pd.Index(lookup_keys.astype("str"))
+    sector_by_key = pd.Series(lookup_sector.array, index=key_index)
+    status_by_key = pd.Series(lookup_status.astype("str").array, index=key_index)
+    result["Sector"] = result["block_key"].map(sector_by_key).astype("Int64")
+    event_status = result["block_key"].map(status_by_key)
+    # A lookup row without a map point is reported as "no_point".
+    event_status = event_status.replace({"missing": "no_point"})
+    # An address that the lookup does not have is "unmatched", and a blank
+    # address is "blank_address".
+    event_status = event_status.mask(event_status.isna(), "unmatched")
+    event_status = event_status.mask(result["block_key"].isna(), "blank_address")
+    result["sector_status"] = event_status.astype("str")
+    return result
