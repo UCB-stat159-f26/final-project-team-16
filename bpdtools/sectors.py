@@ -1,4 +1,4 @@
-"""Make block address keys and place map points in police beat sectors.
+"""Place map points and block addresses in police beat sectors.
 
 normalize_block_address turns block addresses into keys that match across
 tables.
@@ -6,6 +6,7 @@ load_sector_features reads the beat polygons of
 data/boundaries/police_beats.geojson.
 assign_sectors places map points in these polygons.
 haversine_m measures the distance between two map points.
+build_lookup gives each address key one map point and its sector.
 """
 
 import json
@@ -13,8 +14,10 @@ import os
 import pathlib
 
 import numpy as np
+import pandas as pd
 from matplotlib.path import Path as PolygonPath
 
+from bpdtools.crime import lat_lon_numbers, require_columns
 from bpdtools.paths import repo_path
 
 # GeoJSON geometry types that a beat feature can have.
@@ -30,6 +33,28 @@ EDGE_RADIUS = 1e-10
 
 # Mean radius of the Earth in metres, for the haversine distance.
 EARTH_RADIUS_M = 6_371_008.8
+
+# Box around Berkeley in degrees, as (south lat, north lat, west lon, east
+# lon), with the limits left out. A case point outside it is not a Berkeley
+# location (a geocoding error), so it must not pull the address point away.
+BERKELEY_BOX = (37.84, 37.91, -122.33, -122.22)
+
+# Number of decimals of spread_m in the lookup table (0.1 m).
+SPREAD_DECIMALS = 1
+
+# Columns of the lookup table that build_lookup returns, in order.
+LOOKUP_COLUMNS = (
+    "block_key",
+    "n_cases",
+    "lon",
+    "lat",
+    "spread_m",
+    "Sector",
+    "sector_status",
+)
+
+# Columns of the crime cases that build_lookup reads.
+CASE_LOCATION_COLUMNS = ("Block_Address", "lat", "lon")
 
 
 def address_key(address):
@@ -274,3 +299,90 @@ def haversine_m(start_lon, start_lat, end_lon, end_lat):
         + np.cos(start_lat) * np.cos(end_lat) * np.sin((end_lon - start_lon) / 2) ** 2
     )
     return 2 * EARTH_RADIUS_M * np.arcsin(np.sqrt(half_chord))
+
+
+def build_lookup(cases, features, box=BERKELEY_BOX):
+    """Give each block address key one map point and the sector of that point.
+
+    The point of a key is the median longitude and the median latitude of
+    its cases, so that a few far points move it less than a mean would.
+
+    Parameters
+    ----------
+    cases : pandas.DataFrame
+        One row per crime case, for example after one_row_per_case and
+        clear_placeholder_points of bpdtools.crime. Must contain
+        Block_Address, lat, and lon; lat and lon can be numbers or text.
+    features : list of dict
+        GeoJSON beat features from load_sector_features.
+    box : tuple of float, default BERKELEY_BOX
+        (south lat, north lat, west lon, east lon) in degrees. Only points
+        strictly inside the box are used.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The columns of LOOKUP_COLUMNS, one row per block_key, sorted by
+        block_key. n_cases counts the cases used for the key. spread_m is
+        the largest distance in metres from a case point to the median
+        point, rounded to SPREAD_DECIMALS. Sector is pandas Int64 and is
+        <NA> unless sector_status is "assigned"; otherwise sector_status is
+        "outside" or "ambiguous".
+
+    Raises
+    ------
+    KeyError
+        If Block_Address, lat, or lon is missing.
+    ValueError
+        If a lat or lon value is not a number.
+    TypeError
+        If a Block_Address value is not text.
+    """
+    # Stop early with a clear message when a needed column is missing.
+    require_columns(cases, CASE_LOCATION_COLUMNS, "crime cases")
+    # Read the coordinates as numbers; a blank cell becomes NaN.
+    latitudes, longitudes = lat_lon_numbers(cases, "crime cases")
+    # Keep only the address key and the point of each case.
+    points = pd.DataFrame(
+        {
+            "block_key": normalize_block_address(cases["Block_Address"]),
+            "lon": longitudes,
+            "lat": latitudes,
+        }
+    )
+    # Filter: a case needs an address key and a point to place its address.
+    has_key_and_point = (
+        points["block_key"].notna() & points["lon"].notna() & points["lat"].notna()
+    )
+    # Threshold: keep only points strictly inside the box.
+    south_lat, north_lat, west_lon, east_lon = box
+    in_box = (
+        points["lat"].gt(south_lat)
+        & points["lat"].lt(north_lat)
+        & points["lon"].gt(west_lon)
+        & points["lon"].lt(east_lon)
+    )
+    points = points.loc[has_key_and_point & in_box]
+
+    # One point per address: the median longitude and the median latitude
+    # over its cases. Each case counts once.
+    lookup = points.groupby("block_key", sort=True).agg(
+        n_cases=("lon", "size"), lon=("lon", "median"), lat=("lat", "median")
+    )
+    # Spread: the largest distance from a case point to the median point of
+    # its address, in metres (0 for an address with one case).
+    median_points = lookup.loc[points["block_key"], ["lon", "lat"]].to_numpy()
+    distance = haversine_m(
+        points["lon"], points["lat"], median_points[:, 0], median_points[:, 1]
+    )
+    lookup["spread_m"] = (
+        pd.Series(distance, index=points.index).groupby(points["block_key"]).max()
+    ).round(SPREAD_DECIMALS)
+    # The sector of the address is the sector of its median point.
+    labels = pd.Series(
+        assign_sectors(lookup["lon"], lookup["lat"], features), index=lookup.index
+    )
+    is_sector = ~labels.isin(NO_SECTOR_LABELS)
+    lookup["Sector"] = pd.to_numeric(labels.where(is_sector)).astype("Int64")
+    lookup["sector_status"] = labels.where(~is_sector, "assigned")
+    return lookup.reset_index()[list(LOOKUP_COLUMNS)]
