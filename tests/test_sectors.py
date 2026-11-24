@@ -7,7 +7,9 @@ import pandas as pd
 import pytest
 
 from bpdtools.sectors import (
+    EARTH_RADIUS_M,
     assign_sectors,
+    haversine_m,
     load_sector_features,
     normalize_block_address,
 )
@@ -248,3 +250,18 @@ def test_assign_sectors_rejects_lon_and_lat_of_different_length():
     # Each point needs one longitude and one latitude.
     with pytest.raises(ValueError, match="one longitude and one latitude"):
         assign_sectors([0.5, 1.5], [0.5], two_squares())
+
+
+def test_haversine_m_gives_zero_for_the_same_point():
+    """Check that a point and itself are 0 m apart."""
+    # One pair of equal points in Berkeley.
+    distance = haversine_m([-122.26], [37.87], [-122.26], [37.87])
+    assert distance.tolist() == [0.0]
+
+
+def test_haversine_m_measures_one_degree_of_latitude():
+    """Check that one degree north is 1/360 of the Earth's circumference."""
+    # Along a meridian, the distance is the radius times the angle.
+    distance = haversine_m([-122.0, -122.0], [37.0, 0.0], [-122.0, -122.0], [38.0, 1.0])
+    expected = EARTH_RADIUS_M * np.pi / 180
+    assert distance == pytest.approx([expected, expected])
