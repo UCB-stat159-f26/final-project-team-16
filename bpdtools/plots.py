@@ -16,6 +16,12 @@ PLOT_STYLE = {
     "legend.frameon": False,
 }
 
+# Shape of an hour and weekday table: 7 weekdays by 24 hours.
+TABLE_SHAPE = (7, 24)
+
+# Hours that get a tick label on the hour axis.
+HOUR_TICKS = range(0, 24, 3)
+
 
 def set_plot_style():
     """Apply the shared matplotlib settings of the project.
@@ -26,3 +32,51 @@ def set_plot_style():
         The settings in PLOT_STYLE are written to matplotlib.rcParams.
     """
     plt.rcParams.update(PLOT_STYLE)
+
+
+def plot_hour_weekday_heatmap(table, title, ax=None, count_label="Events"):
+    """Draw a 7 by 24 hour and weekday table as a heatmap.
+
+    Parameters
+    ----------
+    table : pandas.DataFrame
+        7 rows (weekdays, Monday first) and 24 columns (hours 0 to 23), such
+        as the result of `bpdtools.clock.hour_weekday_table`.
+    title : str
+        Title of the plot.
+    ax : matplotlib.axes.Axes, optional
+        Axes to draw on. A new figure is made when it is not given.
+    count_label : str, default "Events"
+        Label of the color bar, for example "Noise calls".
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes with the heatmap and its color bar.
+
+    Raises
+    ------
+    ValueError
+        If `table` is not 7 by 24.
+    """
+    # Stop early when the table does not have one row per weekday and one
+    # column per hour, because the tick labels would not match the cells.
+    if table.shape != TABLE_SHAPE:
+        raise ValueError(
+            f"table has shape {table.shape}; it needs 7 weekdays by 24 hours. "
+            "Use bpdtools.clock.hour_weekday_table to build it."
+        )
+    if ax is None:
+        _, ax = plt.subplots()
+
+    # Draw the counts with weekdays as rows and hours as columns.
+    image = ax.imshow(table.to_numpy(), aspect="auto", cmap="viridis")
+    ax.figure.colorbar(image, ax=ax, label=count_label)
+
+    # Label every weekday and every third hour.
+    ax.set_yticks(range(len(table.index)), labels=table.index)
+    ax.set_xticks(HOUR_TICKS, labels=HOUR_TICKS)
+    ax.set_xlabel("Hour of day (local time)")
+    ax.set_ylabel("Day of week")
+    ax.set_title(title)
+    return ax
