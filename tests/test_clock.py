@@ -7,6 +7,7 @@ import pytest
 from bpdtools.clock import (
     hour_weekday_table,
     hourly_profile,
+    overlap_permutation_test,
     profile_overlap,
     timed_hours,
 )
@@ -108,3 +109,33 @@ def test_profile_overlap_rejects_counts_and_short_profiles():
         profile_overlap(counts, counts / 24)
     with pytest.raises(ValueError, match="24 values"):
         profile_overlap(np.ones(23) / 23, np.ones(24) / 24)
+
+
+def test_overlap_permutation_test_repeats_with_the_same_seed():
+    """Check that the same seed gives the same p-value."""
+    rng = np.random.default_rng(0)
+    first = rng.integers(0, 24, size=200)
+    second = rng.integers(0, 24, size=150)
+    one = overlap_permutation_test(first, second, n_permutations=199, seed=5)
+    two = overlap_permutation_test(first, second, n_permutations=199, seed=5)
+    assert one == two
+    assert 0 < one["p_value"] <= 1
+
+
+def test_overlap_permutation_test_finds_separate_hours():
+    """Check the smallest p-value when the two groups never share an hour."""
+    first = np.full(30, 3)
+    second = np.full(30, 15)
+    result = overlap_permutation_test(first, second, n_permutations=99, seed=1)
+    assert result["overlap"] == 0.0
+    assert result["p_value"] == pytest.approx(1 / 100)
+
+
+def test_overlap_permutation_test_rejects_bad_hours():
+    """Check that an hour of 24, float hours, or an empty group raise errors."""
+    with pytest.raises(ValueError, match="0 to 23"):
+        overlap_permutation_test(np.array([24]), np.array([1]))
+    with pytest.raises(ValueError, match="0 to 23"):
+        overlap_permutation_test(np.array([1.5]), np.array([1]))
+    with pytest.raises(ValueError, match="empty"):
+        overlap_permutation_test(np.array([], dtype=int), np.array([1]))
