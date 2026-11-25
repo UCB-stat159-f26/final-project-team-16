@@ -111,6 +111,20 @@ def test_profile_overlap_rejects_counts_and_short_profiles():
         profile_overlap(np.ones(23) / 23, np.ones(24) / 24)
 
 
+def test_profile_overlap_matches_a_series_by_its_hour_labels():
+    """Check that a Series in reverse hour order is read by its labels."""
+    # All events at midnight; the reversed Series still has them at hour 0.
+    at_midnight = pd.Series(np.eye(24)[0], index=range(24))
+    assert profile_overlap(at_midnight, at_midnight.iloc[::-1]) == 1.0
+
+
+def test_profile_overlap_rejects_a_series_without_hour_labels():
+    """Check that a Series labeled 1 to 24 raises a ValueError."""
+    shifted = pd.Series(np.full(24, 1 / 24), index=range(1, 25))
+    with pytest.raises(ValueError, match="hour labels"):
+        profile_overlap(shifted, np.full(24, 1 / 24))
+
+
 def test_overlap_permutation_test_repeats_with_the_same_seed():
     """Check that the same seed gives the same p-value."""
     rng = np.random.default_rng(0)
