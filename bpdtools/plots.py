@@ -80,3 +80,51 @@ def plot_hour_weekday_heatmap(table, title, ax=None, count_label="Events"):
     ax.set_ylabel("Day of week")
     ax.set_title(title)
     return ax
+
+
+def plot_hourly_profiles(profiles, title, ax=None):
+    """Draw the share of events in each hour, one line per group.
+
+    Parameters
+    ----------
+    profiles : pandas.DataFrame
+        24 rows (hours 0 to 23) and one column of shares per group, such as
+        the result of `bpdtools.clock.hourly_profile`.
+    title : str
+        Title of the plot.
+    ax : matplotlib.axes.Axes, optional
+        Axes to draw on. A new figure is made when it is not given.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes with one line per group and a legend when there is more
+        than one group.
+
+    Raises
+    ------
+    ValueError
+        If `profiles` does not have the 24 hours 0 to 23 as its rows.
+    """
+    # Check the rows, so that each line is drawn at the right hours.
+    if list(profiles.index) != list(range(24)):
+        raise ValueError(
+            "profiles needs the hours 0 to 23 as its rows, in order. "
+            "Use bpdtools.clock.hourly_profile to build it."
+        )
+    if ax is None:
+        _, ax = plt.subplots()
+
+    # Draw each group as a percentage of its own events.
+    for group in profiles.columns:
+        ax.plot(profiles.index, 100 * profiles[group], marker="o", label=group)
+
+    # Start the share axis at zero, so that line heights compare fairly.
+    ax.set_ylim(bottom=0)
+    ax.set_xticks(HOUR_TICKS, labels=HOUR_TICKS)
+    ax.set_xlabel("Hour of day (local time)")
+    ax.set_ylabel("Share of events (%)")
+    ax.set_title(title)
+    if len(profiles.columns) > 1:
+        ax.legend()
+    return ax
