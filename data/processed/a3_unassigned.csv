@@ -1,0 +1,7 @@
+outcome,period,total,unassigned,unassigned_share
+noise,semester,995,13,0.01306532663316583
+noise,winter_break,72,0,0.0
+assault,semester,261,10,0.038314176245210725
+assault,winter_break,44,0,0.0
+battery_calls,semester,383,2,0.005221932114882507
+battery_calls,winter_break,61,0,0.0
