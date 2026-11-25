@@ -167,7 +167,9 @@ def profile_overlap(first, second):
     ----------
     first, second : pandas.Series or numpy.ndarray of float
         Shares of events in hours 0 to 23. Each has 24 values that are not
-        negative and sum to 1, for example a column of `hourly_profile`.
+        negative and sum to 1, for example a column of `hourly_profile`. A
+        Series is matched by its hour labels 0 to 23; an array is read in
+        order from hour 0.
 
     Returns
     -------
@@ -177,11 +179,19 @@ def profile_overlap(first, second):
     Raises
     ------
     ValueError
-        If a profile does not have 24 values, has a negative value, or does
-        not sum to 1.
+        If a Series does not have the hour labels 0 to 23, or if a profile
+        does not have 24 values, has a negative value, or does not sum to 1.
     """
     shares = []
     for name, profile in (("first", first), ("second", second)):
+        # Line up a Series by its hour labels, so that the order of its rows
+        # does not change the result. An array is read in order from hour 0.
+        if isinstance(profile, pd.Series):
+            if len(profile) != 24 or set(profile.index) != set(HOURS):
+                raise ValueError(
+                    f"{name} must have the hour labels 0 to 23 as its index."
+                )
+            profile = profile.reindex(HOURS)
         values = np.asarray(profile, dtype=float)
         # A profile must be a full day of shares, so that the hours line up.
         if values.shape != (24,):
