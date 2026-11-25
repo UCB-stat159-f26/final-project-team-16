@@ -4,19 +4,23 @@ import matplotlib.pyplot as plt
 from cycler import cycler
 from matplotlib.colors import LinearSegmentedColormap
 
-# Line colors of the project, in the order that groups get them: blue,
-# orange, green, purple, teal, and ochre. They replace the matplotlib
-# defaults, so that every figure has the same muted look.
-PALETTE = ("#31559a", "#cb5738", "#718c39", "#7e4c8d", "#007653", "#c99436")
+# Line colors of the project, in the order that groups get them: teal,
+# terracotta, navy, ochre, plum, and warm gray. They follow the chart
+# colors of a light report theme and replace the matplotlib defaults.
+PALETTE = ("#3b9d82", "#d97757", "#213f7c", "#cca45e", "#7e4c8d", "#766d66")
 
-# Text and axis colors: near-black for text, warm gray for axes and ticks.
+# Page and line colors: warm paper background, near-black text, warm gray
+# axes and ticks, and a faint grid.
+PAPER = "#faf9f5"
 INK = "#141413"
 MUTED = "#5e5d59"
+AXIS = "#b0aea5"
+GRID = "#e8e6dc"
 
-# One-hue ramp for heatmaps, from warm paper white (few events) to deep
-# blue (many events).
-HEATMAP_COLORS = ("#faf9f5", "#9fb3d6", "#31559a", "#14264a")
-HEATMAP_CMAP = LinearSegmentedColormap.from_list("bpd_blues", HEATMAP_COLORS)
+# Warm one-hue ramp for heatmaps, from paper (few events) through
+# terracotta to deep brown (many events).
+HEATMAP_COLORS = ("#faf9f5", "#efc7a6", "#d97757", "#8a3b22")
+HEATMAP_CMAP = LinearSegmentedColormap.from_list("bpd_warm", HEATMAP_COLORS)
 
 # Figure settings that every notebook shares, so that the figures match.
 PLOT_STYLE = {
@@ -31,12 +35,24 @@ PLOT_STYLE = {
     "axes.spines.right": False,
     "legend.frameon": False,
     "axes.prop_cycle": cycler(color=PALETTE),
+    "figure.facecolor": PAPER,
+    "axes.facecolor": PAPER,
+    "savefig.facecolor": PAPER,
     "text.color": INK,
     "axes.labelcolor": INK,
     "axes.titlecolor": INK,
-    "axes.edgecolor": MUTED,
+    "axes.edgecolor": AXIS,
     "xtick.color": MUTED,
     "ytick.color": MUTED,
+    # Faint horizontal grid lines behind the data
+    "axes.grid": True,
+    "axes.grid.axis": "y",
+    "axes.axisbelow": True,
+    "grid.color": GRID,
+    "grid.linewidth": 0.8,
+    # Thinner lines and smaller markers than the defaults
+    "lines.linewidth": 1.8,
+    "lines.markersize": 4,
 }
 
 # Shape of an hour and weekday table: 7 weekdays by 24 hours.
@@ -93,8 +109,9 @@ def plot_hour_weekday_heatmap(table, title, ax=None, count_label="Events"):
         _, ax = plt.subplots()
 
     # Draw the counts with weekdays as rows and hours as columns, on the
-    # project blue ramp (light means few events).
+    # project warm ramp (light means few events), without grid lines.
     image = ax.imshow(table.to_numpy(), aspect="auto", cmap=HEATMAP_CMAP)
+    ax.grid(False)
     ax.figure.colorbar(image, ax=ax, label=count_label)
 
     # Label every weekday and every third hour.

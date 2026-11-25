@@ -46,7 +46,7 @@ def test_set_plot_style_uses_the_project_palette_for_lines():
 
 
 def test_plot_hour_weekday_heatmap_uses_the_project_ramp():
-    """Check that the heatmap is drawn with the project blue ramp."""
+    """Check that the heatmap is drawn with the project warm ramp."""
     table = pd.DataFrame(np.ones((7, 24)), columns=range(24))
     ax = plot_hour_weekday_heatmap(table, "x", ax=new_axes())
     assert ax.images[0].get_cmap().name == HEATMAP_CMAP.name
