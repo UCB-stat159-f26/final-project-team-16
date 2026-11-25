@@ -82,3 +82,29 @@ def test_monthly_counts_rejects_text_times():
     events = pd.DataFrame({"when": ["2024-01-05"]})
     with pytest.raises(TypeError, match="tz-naive"):
         monthly_counts(events, "when")
+
+
+def test_monthly_counts_names_the_index_and_the_series():
+    """Check the names "month" and "count" and the monthly PeriodIndex."""
+    counts = monthly_counts(small_events(), "when")
+    assert counts.name == "count"
+    assert counts.index.name == "month"
+    assert isinstance(counts.index, pd.PeriodIndex)
+    assert counts.index.freqstr == "M"
+
+
+def test_monthly_counts_leaves_the_input_unchanged():
+    """Check that the table is the same before and after the call."""
+    events = small_events()
+    before = events.copy(deep=True)
+    monthly_counts(events, "when", id_column="event_id")
+    pd.testing.assert_frame_equal(events, before)
+
+
+def test_monthly_counts_returns_an_empty_series_for_an_empty_table():
+    """Check that a table with no rows gives an empty Series named "count"."""
+    events = pd.DataFrame({"when": pd.to_datetime([])})
+    counts = monthly_counts(events, "when")
+    assert counts.empty
+    assert counts.name == "count"
+    assert counts.index.name == "month"
