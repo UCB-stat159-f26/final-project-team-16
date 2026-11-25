@@ -180,7 +180,8 @@ def profile_overlap(first, second):
     ------
     ValueError
         If a Series does not have the hour labels 0 to 23, or if a profile
-        does not have 24 values, has a negative value, or does not sum to 1.
+        does not have 24 values, has a missing, infinite, or negative value,
+        or does not sum to 1.
     """
     shares = []
     for name, profile in (("first", first), ("second", second)):
@@ -196,6 +197,13 @@ def profile_overlap(first, second):
         # A profile must be a full day of shares, so that the hours line up.
         if values.shape != (24,):
             raise ValueError(f"{name} has shape {values.shape}; it needs 24 values.")
+        # A missing share would make the sum and the overlap NaN without an
+        # error, so every hour needs a finite share, 0 for no events.
+        if not np.isfinite(values).all():
+            raise ValueError(
+                f"{name} has a missing or infinite share; give every hour a "
+                "share, 0 for an hour without events."
+            )
         if (values < 0).any() or abs(values.sum() - 1) > SHARE_SUM_TOLERANCE:
             raise ValueError(
                 f"{name} must hold shares that are not negative and sum to 1; "
