@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 
+from bpdtools.config import SEED
 from bpdtools.timeparts import add_time_parts
 
 # Hours of the day and day numbers of the week (Monday is 0) in each table.
@@ -20,8 +21,14 @@ WEEKDAY_NAMES = (
     "Sunday",
 )
 
+# Number of label shuffles in overlap_permutation_test.
+DEFAULT_PERMUTATIONS = 9999
+
 # Allowed difference from 1 for the sum of the shares of a profile.
 SHARE_SUM_TOLERANCE = 1e-9
+
+# Rounding margin when a shuffled overlap is compared with the observed one.
+OVERLAP_TOLERANCE = 1e-12
 
 
 def timed_hours(events, time_column="local_time"):
@@ -186,3 +193,94 @@ def profile_overlap(first, second):
             )
         shares.append(values)
     return float(np.minimum(shares[0], shares[1]).sum())
+
+
+def overlap_permutation_test(
+    first_hours, second_hours, n_permutations=DEFAULT_PERMUTATIONS, seed=SEED
+):
+    """Test whether two groups of events have different hour profiles.
+
+    The test pools the hours of both groups, shuffles the group labels, and
+    recomputes the overlap of the two hour profiles each time. A low
+    p-value means that the observed overlap is lower than label shuffles
+    give. The test treats events as independent of each other.
+
+    Parameters
+    ----------
+    first_hours, second_hours : pandas.Series or numpy.ndarray of int
+        Local hour (0 to 23) of each event in the two groups, for example
+        the `hour` column of `timed_hours`.
+    n_permutations : int, default DEFAULT_PERMUTATIONS
+        Number of label shuffles.
+    seed : int, default SEED
+        Seed of the random number generator, so that each run gives the
+        same p-value.
+
+    Returns
+    -------
+    dict
+        "overlap": the observed overlap (float), "p_value": the share of
+        shuffles, with the observed labels counted as one, whose overlap is
+        at most the observed overlap (float), and "n_permutations" (int).
+
+    Raises
+    ------
+    ValueError
+        If a group is empty, if an hour is not an integer from 0 to 23, or
+        if `n_permutations` is less than 1.
+    """
+    groups = []
+    for name, hours in (("first_hours", first_hours), ("second_hours", second_hours)):
+        values = np.asarray(hours)
+        # Accept only whole hours of the day, so that each count has a bin.
+        if values.size == 0:
+            raise ValueError(f"{name} is empty.")
+        if (
+            not np.issubdtype(values.dtype, np.integer)
+            or ((values < 0) | (values > 23)).any()
+        ):
+            raise ValueError(f"{name} must hold integer hours from 0 to 23.")
+        groups.append(values)
+    if n_permutations < 1:
+        raise ValueError("n_permutations must be at least 1.")
+
+    def overlap_of(first, second):
+        """Return the overlap of the hour profiles of two arrays of hours.
+
+        Parameters
+        ----------
+        first, second : numpy.ndarray of int
+            Hours from 0 to 23.
+
+        Returns
+        -------
+        float
+            Sum over the hours of the smaller of the two shares.
+        """
+        first_shares = np.bincount(first, minlength=24) / first.size
+        second_shares = np.bincount(second, minlength=24) / second.size
+        return np.minimum(first_shares, second_shares).sum()
+
+    observed = overlap_of(groups[0], groups[1])
+
+    # Shuffle the pooled hours and split them again into two groups of the
+    # original sizes. The seeded generator makes the shuffles repeatable.
+    pooled = np.concatenate(groups)
+    first_size = groups[0].size
+    rng = np.random.default_rng(seed)
+    shuffled_overlaps = np.empty(n_permutations)
+    for index in range(n_permutations):
+        order = rng.permutation(pooled.size)
+        shuffled_overlaps[index] = overlap_of(
+            pooled[order[:first_size]], pooled[order[first_size:]]
+        )
+
+    # Count the observed labels as one of the shuffles, so that the
+    # p-value is never 0. The tolerance keeps a shuffle with the same
+    # counts as the observed one from missing by a rounding error.
+    at_most_observed = int((shuffled_overlaps <= observed + OVERLAP_TOLERANCE).sum())
+    return {
+        "overlap": float(observed),
+        "p_value": (at_most_observed + 1) / (n_permutations + 1),
+        "n_permutations": int(n_permutations),
+    }
