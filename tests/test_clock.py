@@ -125,6 +125,14 @@ def test_profile_overlap_rejects_a_series_without_hour_labels():
         profile_overlap(shifted, np.full(24, 1 / 24))
 
 
+def test_profile_overlap_rejects_a_missing_hour():
+    """Check that a NaN share raises a ValueError instead of giving NaN."""
+    shares = np.full(24, 1 / 23)
+    shares[5] = np.nan
+    with pytest.raises(ValueError, match="missing or infinite"):
+        profile_overlap(shares, np.full(24, 1 / 24))
+
+
 def test_overlap_permutation_test_repeats_with_the_same_seed():
     """Check that the same seed gives the same p-value."""
     rng = np.random.default_rng(0)
