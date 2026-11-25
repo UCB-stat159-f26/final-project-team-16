@@ -1,5 +1,6 @@
 """Count events by hour and weekday and compare the hour profiles of two groups."""
 
+import numpy as np
 import pandas as pd
 
 from bpdtools.timeparts import add_time_parts
@@ -18,6 +19,9 @@ WEEKDAY_NAMES = (
     "Saturday",
     "Sunday",
 )
+
+# Allowed difference from 1 for the sum of the shares of a profile.
+SHARE_SUM_TOLERANCE = 1e-9
 
 
 def timed_hours(events, time_column="local_time"):
@@ -143,3 +147,42 @@ def hourly_profile(events, time_column="local_time", group_column=None):
         .rename_axis(index="hour", columns=group_column)
     )
     return counts / counts.sum()
+
+
+def profile_overlap(first, second):
+    """Measure how much two hour profiles agree.
+
+    The overlap is the sum over the hours of the smaller of the two shares.
+    It is 1 when the profiles are the same and 0 when the two groups never
+    happen in the same hour.
+
+    Parameters
+    ----------
+    first, second : pandas.Series or numpy.ndarray of float
+        Shares of events in hours 0 to 23. Each has 24 values that are not
+        negative and sum to 1, for example a column of `hourly_profile`.
+
+    Returns
+    -------
+    float
+        The overlap, from 0 to 1.
+
+    Raises
+    ------
+    ValueError
+        If a profile does not have 24 values, has a negative value, or does
+        not sum to 1.
+    """
+    shares = []
+    for name, profile in (("first", first), ("second", second)):
+        values = np.asarray(profile, dtype=float)
+        # A profile must be a full day of shares, so that the hours line up.
+        if values.shape != (24,):
+            raise ValueError(f"{name} has shape {values.shape}; it needs 24 values.")
+        if (values < 0).any() or abs(values.sum() - 1) > SHARE_SUM_TOLERANCE:
+            raise ValueError(
+                f"{name} must hold shares that are not negative and sum to 1; "
+                f"its sum is {values.sum():.6f}. Use hourly_profile to build it."
+            )
+        shares.append(values)
+    return float(np.minimum(shares[0], shares[1]).sum())
