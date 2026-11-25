@@ -1,6 +1,7 @@
 """Tests for bpdtools.trends."""
 
 import pandas as pd
+import pytest
 
 from bpdtools.trends import monthly_counts
 
@@ -62,3 +63,22 @@ def test_monthly_counts_counts_each_row_with_a_missing_id():
     )
     counts = monthly_counts(events, "when", id_column="event_id")
     assert counts.tolist() == [3]
+
+
+def test_monthly_counts_names_a_missing_time_column():
+    """Check that a missing time column raises a KeyError with its name."""
+    with pytest.raises(KeyError, match="missing"):
+        monthly_counts(small_events(), time_column="missing")
+
+
+def test_monthly_counts_names_a_missing_id_column():
+    """Check that a missing id column raises a KeyError with its name."""
+    with pytest.raises(KeyError, match="no_such_id"):
+        monthly_counts(small_events(), "when", id_column="no_such_id")
+
+
+def test_monthly_counts_rejects_text_times():
+    """Check that times stored as text raise a TypeError."""
+    events = pd.DataFrame({"when": ["2024-01-05"]})
+    with pytest.raises(TypeError, match="tz-naive"):
+        monthly_counts(events, "when")
