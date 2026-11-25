@@ -1,8 +1,10 @@
 """Tests for bpdtools.clock."""
 
+import numpy as np
 import pandas as pd
+import pytest
 
-from bpdtools.clock import hour_weekday_table, timed_hours
+from bpdtools.clock import hour_weekday_table, hourly_profile, timed_hours
 
 
 def events_at(*times):
@@ -48,3 +50,35 @@ def test_hour_weekday_table_counts_the_repeated_hour_twice():
     # Both are Sunday 1 a.m.; the event without a time is not counted.
     assert table.loc["Sunday", 1] == 2
     assert int(table.to_numpy().sum()) == 2
+
+
+def test_hourly_profile_gives_shares_per_group():
+    """Check that each group column holds shares that sum to 1."""
+    events = events_at(
+        "2024-01-01 08:00:00", "2024-01-01 08:30:00", "2024-01-01 20:00:00"
+    )
+    events["call_group"] = ["noise", "noise", "battery"]
+    profile = hourly_profile(events, group_column="call_group")
+    assert profile.shape == (24, 2)
+    assert profile.loc[8, "noise"] == 1.0
+    assert profile.loc[20, "battery"] == 1.0
+    assert np.allclose(profile.sum(), 1.0)
+
+
+def test_hourly_profile_without_groups_uses_one_column():
+    """Check the single "all" column when no group column is given."""
+    profile = hourly_profile(events_at("2024-01-01 08:00:00", "2024-01-01 09:00:00"))
+    assert list(profile.columns) == ["all"]
+    assert profile.loc[8, "all"] == 0.5
+
+
+def test_hourly_profile_rejects_events_without_times():
+    """Check that a table with no timed event raises a ValueError."""
+    with pytest.raises(ValueError, match="No event has a time"):
+        hourly_profile(events_at(None))
+
+
+def test_hourly_profile_names_a_missing_group_column():
+    """Check that a missing group column raises a KeyError with its name."""
+    with pytest.raises(KeyError, match="call_group"):
+        hourly_profile(events_at("2024-01-01 08:00:00"), group_column="call_group")
