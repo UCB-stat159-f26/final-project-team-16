@@ -6,6 +6,27 @@ ENV_NAME := $(shell sed -n 's/^name:[[:space:]]*\([^[:space:]]*\).*/\1/p' enviro
 
 .PHONY: help env test
 
+# Notebooks that `make all` runs, in this order: the analysis notebooks in
+# notebooks/ by name (01, 02, ...), then the main report and the
+# contributions. A notebook that does not exist yet is skipped.
+NOTEBOOKS := $(sort $(wildcard notebooks/*.ipynb)) $(wildcard main.ipynb contributions.ipynb)
+
+# Run a notebook in place with the python3 kernel. Run times are not saved
+# in the notebook, so a rerun on the same machine gives the same files.
+NBCONVERT := jupyter nbconvert --to notebook --execute --inplace \
+	--ExecutePreprocessor.kernel_name=python3 \
+	--ExecutePreprocessor.record_timing=False
+
+# Each notebook is its own phony target, so `make all` runs them one by one
+# in the order of NOTEBOOKS and stops at the first notebook that fails. The
+# notebooks read only files in the repository and never download data.
+.PHONY: all $(NOTEBOOKS)
+## all: run every notebook in notebooks/, then main.ipynb and contributions.ipynb
+all: $(NOTEBOOKS)
+
+$(NOTEBOOKS):
+	conda run --no-capture-output --name $(ENV_NAME) $(NBCONVERT) $@
+
 ## help: list the targets of this Makefile
 help:
 	@sed -n 's/^## //p' $(MAKEFILE_LIST)
