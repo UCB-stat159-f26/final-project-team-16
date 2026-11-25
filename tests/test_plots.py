@@ -6,7 +6,12 @@ import pandas as pd
 import pytest
 from matplotlib.figure import Figure
 
-from bpdtools.plots import PLOT_STYLE, plot_hour_weekday_heatmap, set_plot_style
+from bpdtools.plots import (
+    PLOT_STYLE,
+    plot_hour_weekday_heatmap,
+    plot_hourly_profiles,
+    set_plot_style,
+)
 
 
 def new_axes():
@@ -45,3 +50,21 @@ def test_plot_hour_weekday_heatmap_rejects_a_table_of_the_wrong_shape():
     """Check that a 24 by 7 table raises a ValueError."""
     with pytest.raises(ValueError, match="7 weekdays by 24 hours"):
         plot_hour_weekday_heatmap(pd.DataFrame(np.zeros((24, 7))), "x", new_axes())
+
+
+def test_plot_hourly_profiles_draws_one_line_per_group_in_percent():
+    """Check two lines, their percentages, and the legend."""
+    shares = np.zeros(24)
+    shares[[8, 20]] = 0.5
+    profiles = pd.DataFrame({"noise": shares, "battery": np.full(24, 1 / 24)})
+    ax = plot_hourly_profiles(profiles, "Calls by hour", ax=new_axes())
+    assert len(ax.get_lines()) == 2
+    assert ax.get_lines()[0].get_ydata()[8] == 50
+    assert ax.get_legend() is not None
+
+
+def test_plot_hourly_profiles_rejects_rows_that_are_not_the_hours():
+    """Check that profiles without the rows 0 to 23 raise a ValueError."""
+    profiles = pd.DataFrame({"noise": np.full(24, 1 / 24)}, index=range(1, 25))
+    with pytest.raises(ValueError, match="hours 0 to 23"):
+        plot_hourly_profiles(profiles, "x", new_axes())
