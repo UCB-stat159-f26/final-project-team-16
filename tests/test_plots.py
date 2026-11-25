@@ -7,6 +7,8 @@ import pytest
 from matplotlib.figure import Figure
 
 from bpdtools.plots import (
+    HEATMAP_CMAP,
+    PALETTE,
     PLOT_STYLE,
     plot_hour_weekday_heatmap,
     plot_hourly_profiles,
@@ -30,6 +32,24 @@ def test_set_plot_style_writes_the_shared_settings():
     with plt.rc_context():
         set_plot_style()
         assert plt.rcParams["savefig.dpi"] == PLOT_STYLE["savefig.dpi"]
+
+
+def test_set_plot_style_uses_the_project_palette_for_lines():
+    """Check that new lines take the project colors in order, not the defaults."""
+    with plt.rc_context():
+        set_plot_style()
+        ax = new_axes()
+        first = ax.plot([0, 1])[0]
+        second = ax.plot([1, 0])[0]
+        assert first.get_color() == PALETTE[0]
+        assert second.get_color() == PALETTE[1]
+
+
+def test_plot_hour_weekday_heatmap_uses_the_project_ramp():
+    """Check that the heatmap is drawn with the project blue ramp."""
+    table = pd.DataFrame(np.ones((7, 24)), columns=range(24))
+    ax = plot_hour_weekday_heatmap(table, "x", ax=new_axes())
+    assert ax.images[0].get_cmap().name == HEATMAP_CMAP.name
 
 
 def test_plot_hour_weekday_heatmap_draws_each_cell_and_labels():
