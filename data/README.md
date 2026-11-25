@@ -35,6 +35,8 @@ Only two dated collision records precede 2011 (one in 2007 and one in 2010). The
 
 For local-day and hourly collision analyses, use `Date`, `Time`, and `Hour` (America/Los_Angeles). The source `DateTime` represents UTC and can fall on the following calendar day. Report exclusions for missing dates or times in the relevant analysis.
 
+Recorded collision times before 06:00 appear unreliable. This check uses the local time of day: `DateTime` converted from UTC to America/Los_Angeles, which matches `Time` in every record that has both. No record has a local time from 00:00 to 00:59, all 46 records at 01:xx have minutes 00 to 09, and 48% of the records from 01:00 to 05:59 have minutes under 10, against 20% from 06:00 to 19:59. The pattern appears in every year and in both fields, so the preparation script does not cause it. The source of the pattern is not known. Vehicle-stop times do not show it. When a result compares collision hours, also report the same result for 06:00 to 23:59 only.
+
 Vehicle stops retain latitude and longitude in degrees. Collisions have an accident-location label and projected Web Mercator coordinates (`x`, `y`). Before assigning police beats, transform points and boundaries to the same coordinate system and report unmatched points. Coordinate presence alone does not establish a valid Berkeley location.
 
 ### Raw snapshot SHA-256
