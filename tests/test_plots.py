@@ -1,8 +1,23 @@
 """Tests for bpdtools.plots."""
 
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import pytest
+from matplotlib.figure import Figure
 
-from bpdtools.plots import PLOT_STYLE, set_plot_style
+from bpdtools.plots import PLOT_STYLE, plot_hour_weekday_heatmap, set_plot_style
+
+
+def new_axes():
+    """Make one axes on a figure that is not shown on screen.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        Axes of a new matplotlib Figure.
+    """
+    return Figure().subplots()
 
 
 def test_set_plot_style_writes_the_shared_settings():
@@ -10,3 +25,23 @@ def test_set_plot_style_writes_the_shared_settings():
     with plt.rc_context():
         set_plot_style()
         assert plt.rcParams["savefig.dpi"] == PLOT_STYLE["savefig.dpi"]
+
+
+def test_plot_hour_weekday_heatmap_draws_each_cell_and_labels():
+    """Check the cell values, the weekday labels, and the axis titles."""
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+    table = pd.DataFrame(
+        np.arange(168).reshape(7, 24), index=[*days, "Sunday"], columns=range(24)
+    )
+    ax = plot_hour_weekday_heatmap(table, "Noise calls", ax=new_axes())
+    # The image holds the table as it is: Monday 0 a.m. top left.
+    assert np.array_equal(np.asarray(ax.images[0].get_array()), table.to_numpy())
+    assert [label.get_text() for label in ax.get_yticklabels()][0] == "Monday"
+    assert ax.get_title() == "Noise calls"
+    assert ax.get_xlabel() == "Hour of day (local time)"
+
+
+def test_plot_hour_weekday_heatmap_rejects_a_table_of_the_wrong_shape():
+    """Check that a 24 by 7 table raises a ValueError."""
+    with pytest.raises(ValueError, match="7 weekdays by 24 hours"):
+        plot_hour_weekday_heatmap(pd.DataFrame(np.zeros((24, 7))), "x", new_axes())
