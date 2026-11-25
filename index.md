@@ -2,6 +2,8 @@
 title: The rhythm of a college town
 ---
 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/UCB-stat159-f26/final-project-team-16/HEAD?labpath=main.ipynb)
+
 When and where do problems arise in Berkeley, and does police enforcement follow them?
 
 This is the final project of Team 16 for STAT 159 at UC Berkeley, Fall 2026. It uses open data from the [Berkeley Police Department Transparency Hub](https://bpd-transparency-initiative-berkeleypd.hub.arcgis.com/search): calls for service, crime cases, collisions, and vehicle stops.
