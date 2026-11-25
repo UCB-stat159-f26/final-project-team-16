@@ -57,3 +57,11 @@ make lint
 ```
 
 `make lint` runs `ruff check .` and then `ruff format --check .` inside the `bpd-rhythm` environment. The first command checks code style, import order, names, and docstrings in the NumPy style. The second command lists the files that `ruff format` would change. Both commands read their settings from `pyproject.toml` and also check the notebooks. To format a file, run `ruff format <file>` in the activated environment.
+
+### Rerunning the analysis
+
+```bash
+make all
+```
+
+`make all` runs every notebook in `notebooks/` in name order, followed by `main.ipynb` and `contributions.ipynb`, inside the `bpd-rhythm` environment. Each notebook runs in place with the `python3` kernel and rewrites its figures in `figures/` and its tables in `results/`. The command reads only files in the repository and does not download data. Run times are not saved in the notebooks, so a second run produces the same files.
