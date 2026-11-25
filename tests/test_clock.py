@@ -4,7 +4,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from bpdtools.clock import hour_weekday_table, hourly_profile, timed_hours
+from bpdtools.clock import (
+    hour_weekday_table,
+    hourly_profile,
+    profile_overlap,
+    timed_hours,
+)
 
 
 def events_at(*times):
@@ -82,3 +87,24 @@ def test_hourly_profile_names_a_missing_group_column():
     """Check that a missing group column raises a KeyError with its name."""
     with pytest.raises(KeyError, match="call_group"):
         hourly_profile(events_at("2024-01-01 08:00:00"), group_column="call_group")
+
+
+def test_profile_overlap_of_same_disjoint_and_half_shared_profiles():
+    """Check the overlap values 1, 0, and 0.5."""
+    at_eight = np.zeros(24)
+    at_eight[8] = 1.0
+    at_nine = np.zeros(24)
+    at_nine[9] = 1.0
+    eight_and_nine = (at_eight + at_nine) / 2
+    assert profile_overlap(at_eight, at_eight) == 1.0
+    assert profile_overlap(at_eight, at_nine) == 0.0
+    assert profile_overlap(at_eight, eight_and_nine) == 0.5
+
+
+def test_profile_overlap_rejects_counts_and_short_profiles():
+    """Check that counts or a profile without 24 hours raise a ValueError."""
+    counts = np.ones(24)
+    with pytest.raises(ValueError, match="sum to 1"):
+        profile_overlap(counts, counts / 24)
+    with pytest.raises(ValueError, match="24 values"):
+        profile_overlap(np.ones(23) / 23, np.ones(24) / 24)
