@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from bpdtools.clock import timed_hours
+from bpdtools.clock import hour_weekday_table, timed_hours
 
 
 def events_at(*times):
@@ -29,3 +29,22 @@ def test_timed_hours_drops_missing_times_and_keeps_int_hours():
     assert parts["hour"].tolist() == [22]
     assert parts["hour"].dtype.kind == "i"
     assert bool(parts["is_weekend"].iloc[0]) is True
+
+
+def test_hour_weekday_table_puts_event_in_its_cell():
+    """Check that one Monday 3 a.m. event is counted in row Monday, column 3."""
+    # 2024-11-04 is a Monday.
+    table = hour_weekday_table(events_at("2024-11-04 03:15:00"))
+    assert table.shape == (7, 24)
+    assert table.loc["Monday", 3] == 1
+    assert int(table.to_numpy().sum()) == 1
+
+
+def test_hour_weekday_table_counts_the_repeated_hour_twice():
+    """Check two 01:30 events on 2024-11-03, the day the clocks fall back."""
+    table = hour_weekday_table(
+        events_at("2024-11-03 01:30:00", "2024-11-03 01:30:00", None)
+    )
+    # Both are Sunday 1 a.m.; the event without a time is not counted.
+    assert table.loc["Sunday", 1] == 2
+    assert int(table.to_numpy().sum()) == 2
