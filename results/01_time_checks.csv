@@ -1,0 +1,5 @@
+dataset,timed_rows,rows_at_00_00_00,share_at_00_00_00,rows_at_12_00_00,share_at_12_00_00,has_seconds
+Calls for Service,307628,2,0.0,4,0.0,True
+Crime cases,51418,2134,0.0415,1624,0.0316,False
+Collisions,16538,0,0.0,68,0.0041,False
+Vehicle stops,7431,10,0.0013,13,0.0017,False
