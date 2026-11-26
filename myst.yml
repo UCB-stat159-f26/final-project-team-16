@@ -32,3 +32,9 @@ project:
     - file: contributions.ipynb
 site:
   template: book-theme
+  # Course logo in the top bar and the browser tab, and our own page style
+  options:
+    logo: assets/logo-159.svg
+    logo_text: STAT 159 · Team 16
+    favicon: assets/favicon-159.png
+    style: assets/site.css
