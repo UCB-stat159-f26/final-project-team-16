@@ -3,7 +3,7 @@
 import pandas as pd
 import pytest
 
-from bpdtools.hotspots import block_counts, top_share
+from bpdtools.hotspots import block_counts, top_share, yearly_top_overlap
 
 
 def small_calls():
@@ -143,3 +143,62 @@ def test_top_share_rejects_counts_without_calls():
     empty = pd.Series([], dtype="int64", name="count")
     with pytest.raises(ValueError, match="no calls"):
         top_share(empty, [0.1])
+
+
+def three_years():
+    """Build calls on four blocks over 2021, 2022, and 2023.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Columns `local_time` (tz-naive datetime64) and `Block Address`
+        (text). With n_top=2, the top blocks are {A, B} in 2021, {A, C} in
+        2022, and {A, B, D} in 2023, where B and D tie for second place.
+    """
+    rows = [
+        ("2021-03-01", "100 A ST", 3),
+        ("2021-03-01", "200 B ST", 2),
+        ("2021-03-01", "300 C ST", 1),
+        ("2022-05-01", "100 A ST", 4),
+        ("2022-05-01", "300 C ST", 3),
+        ("2022-05-01", "200 B ST", 1),
+        ("2023-07-01", "100 A ST", 5),
+        ("2023-07-01", "200 B ST", 2),
+        ("2023-07-01", "400 D ST", 2),
+    ]
+    records = [(day, block) for day, block, n in rows for _ in range(n)]
+    calls = pd.DataFrame(records, columns=["local_time", "Block Address"])
+    calls["local_time"] = pd.to_datetime(calls["local_time"])
+    return calls
+
+
+def test_yearly_top_overlap_counts_shared_top_blocks_of_next_years():
+    """Check the pairs 2021-2022 and 2022-2023 with n_top=2."""
+    pairs, _ = yearly_top_overlap(three_years(), "local_time", n_top=2)
+    assert pairs["year"].tolist() == [2021, 2022]
+    assert pairs["next_year"].tolist() == [2022, 2023]
+    # 2023 has three top blocks, because B and D tie for second place.
+    assert pairs["n_top"].tolist() == [2, 2]
+    assert pairs["n_top_next"].tolist() == [2, 3]
+    # 2021-2022 share A; 2022-2023 share only A.
+    assert pairs["n_shared"].tolist() == [1, 1]
+
+
+def test_yearly_top_overlap_lists_the_blocks_on_top_every_year():
+    """Check that only block A is a top block in all three years."""
+    _, every_year = yearly_top_overlap(three_years(), "local_time", n_top=2)
+    assert every_year == ["100 A ST"]
+
+
+def test_yearly_top_overlap_rejects_n_top_below_one():
+    """Check that n_top=0 raises a ValueError."""
+    with pytest.raises(ValueError, match="n_top"):
+        yearly_top_overlap(three_years(), "local_time", n_top=0)
+
+
+def test_yearly_top_overlap_rejects_text_times():
+    """Check that times stored as text raise a TypeError."""
+    calls = three_years()
+    calls["local_time"] = calls["local_time"].astype(str)
+    with pytest.raises(TypeError, match="tz-naive"):
+        yearly_top_overlap(calls, "local_time", n_top=2)

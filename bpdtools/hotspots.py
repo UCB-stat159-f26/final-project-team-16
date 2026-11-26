@@ -2,6 +2,7 @@
 
 block_counts counts calls per block, busiest first.
 top_share gives the share of all calls in the busiest blocks.
+yearly_top_overlap compares the busiest blocks of consecutive years.
 """
 
 import math
@@ -19,6 +20,9 @@ COUNT_NAME = "count"
 
 # Columns of the table that top_share returns, in order.
 SHARE_COLUMNS = ("fraction", "n_blocks", "n_calls", "share")
+
+# Columns of the table of year pairs that yearly_top_overlap returns, in order.
+OVERLAP_COLUMNS = ("year", "next_year", "n_top", "n_top_next", "n_shared")
 
 
 def block_counts(events, address_column=ADDRESS_COLUMN):
@@ -125,3 +129,85 @@ def top_share(counts, fractions):
         n_calls = int(sorted_counts.iloc[:n_blocks].sum())
         rows.append((fraction, n_blocks, n_calls, n_calls / total_calls))
     return pd.DataFrame(rows, columns=list(SHARE_COLUMNS))
+
+
+def yearly_top_overlap(events, time_column, n_top, address_column=ADDRESS_COLUMN):
+    """Compare the busiest blocks of each year with those of the next year.
+
+    The top blocks of a year are the `n_top` blocks with the most calls in
+    that year. A block that ties with the last of them is also a top block,
+    so a year can have more than `n_top` top blocks; leaving it out would
+    let the order of the block names decide.
+
+    Parameters
+    ----------
+    events : pandas.DataFrame
+        One row per event. Must contain `time_column` and `address_column`.
+    time_column : str
+        Name of a tz-naive datetime64 column with the local time of each
+        event, such as `local_time` of `load_calls`.
+    n_top : int
+        Number of top blocks to compare in each year, at least 1.
+    address_column : str, default "Block Address"
+        Name of the column that holds the block address of each event.
+
+    Returns
+    -------
+    pairs : pandas.DataFrame
+        One row per pair of consecutive years with events, with the columns
+        `year`, `next_year`, `n_top` and `n_top_next` (the number of top
+        blocks of each year, ties included), and `n_shared` (the number of
+        blocks that are top blocks in both years).
+    every_year : list of str
+        Block keys that are top blocks in every year, sorted.
+
+    Raises
+    ------
+    KeyError
+        If `time_column` or `address_column` is not a column of `events`.
+    TypeError
+        If `time_column` is not tz-naive datetime64.
+    ValueError
+        If `n_top` is smaller than 1.
+    """
+    if n_top < 1:
+        raise ValueError(f"n_top is {n_top!r}; pass at least 1.")
+    if time_column not in events.columns:
+        raise KeyError(
+            f"events has no column {time_column!r}. Its columns are "
+            f"{list(events.columns)}; pass one of these names."
+        )
+    if not pd.api.types.is_datetime64_dtype(events[time_column]):
+        raise TypeError(
+            f"{time_column!r} has dtype {events[time_column].dtype}; it must "
+            "be tz-naive datetime64 in local time."
+        )
+
+    # Top blocks of each year: count the calls of that year per block, and
+    # keep every block with at least the count of the n_top-th block.
+    years = events[time_column].dt.year
+    top_by_year = {}
+    for year in sorted(years.dropna().unique()):
+        counts = block_counts(events.loc[years == year], address_column)
+        if counts.empty:
+            continue
+        cutoff = counts.iloc[min(n_top, len(counts)) - 1]
+        top_by_year[int(year)] = set(counts.index[counts >= cutoff])
+
+    # Compare each year with the next year that has calls.
+    ordered = sorted(top_by_year)
+    rows = [
+        (
+            year,
+            next_year,
+            len(top_by_year[year]),
+            len(top_by_year[next_year]),
+            len(top_by_year[year] & top_by_year[next_year]),
+        )
+        for year, next_year in zip(ordered, ordered[1:])
+    ]
+    pairs = pd.DataFrame(rows, columns=list(OVERLAP_COLUMNS))
+
+    # Blocks that are top blocks in every year.
+    every_year = sorted(set.intersection(*top_by_year.values())) if top_by_year else []
+    return pairs, every_year
