@@ -26,6 +26,39 @@ Calls for service, crime cases, collisions, and vehicle stops
 This is the final project of Team 16 for STAT 159. It uses four tables of open data from the Berkeley Police Department and asks four groups of questions: the context, the time of day and week, the academic calendar, and the location. The [main report](main.ipynb) tells the whole story.
 :::
 
+::::{div}
+:class: glance
+:::{div}
+:class: tile
+**307,628**
+
+calls for service, 2021 to 2025
+:::
+:::{div}
+:class: tile
+**51,418**
+
+crime cases, 2021 to 2025
+:::
+:::{div}
+:class: tile
+**16,639**
+
+collisions, Dec 2007 to Nov 2026
+:::
+:::{div}
+:class: tile
+**7,431**
+
+vehicle stops, Jan 2024 to May 2026
+:::
+::::
+
+:::{div}
+:class: small
+Records in each processed table, from the [data overview](notebooks/01_data_overview.ipynb).
+:::
+
 ## Research questions
 
 | Section | Question |
