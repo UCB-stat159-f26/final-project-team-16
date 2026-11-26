@@ -18,7 +18,10 @@ project:
   # not run them again.
   toc:
     - file: index.md
+    # The report has the same title as the home page, so give it a short
+    # name in the table of contents
     - file: main.ipynb
+      title: Report
     # Every analysis notebook, in name order, so a new one appears by itself
     - title: Analysis notebooks
       children:
