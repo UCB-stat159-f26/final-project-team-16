@@ -1,0 +1,161 @@
+/* Custom style of the project website. The colors match bpdtools/plots.py,
+   so the figures sit on the same paper color as the page. */
+
+/* Color tokens for light mode */
+:root {
+  --page: #faf9f5;
+  --surface: #ffffff;
+  --ink: #141413;
+  --ink2: #30302e;
+  --muted: #5e5d59;
+  --grid: #e8e6dc;
+  --axis: #b0aea5;
+  --soft: #f0eee6;
+  --accent: #d97757;
+}
+
+/* Color tokens for dark mode; the theme sets the .dark class on <html> */
+.dark {
+  --page: #141413;
+  --surface: #1f1e1d;
+  --ink: #faf9f5;
+  --ink2: #c9c7bf;
+  --muted: #87867f;
+  --grid: #30302e;
+  --axis: #5e5d59;
+  --soft: #262624;
+}
+
+/* Point the theme colors at the tokens above, in both modes */
+:root,
+.dark {
+  --myst-color-bg: var(--page);
+  --myst-color-bg-secondary: var(--soft);
+  --myst-color-surface: var(--soft);
+  --myst-color-surface-hover: var(--grid);
+  --myst-color-border: var(--grid);
+  --myst-color-border-strong: var(--axis);
+  --myst-color-text: var(--ink);
+  --myst-color-text-secondary: var(--muted);
+  --myst-color-text-tertiary: var(--muted);
+  --myst-color-prose-body: var(--ink2);
+  --myst-color-link: var(--ink);
+  --myst-color-link-hover: var(--ink);
+  --myst-color-link-underline: var(--axis);
+  --myst-color-active: var(--ink);
+  --myst-color-active-bg: var(--soft);
+  --myst-color-active-surface: var(--soft);
+  --myst-color-focus-outline: var(--accent);
+  --myst-color-focus-ring: var(--accent);
+}
+
+body {
+  background: var(--page);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Top bar: page color, a hairline under it, no shadow */
+.myst-top-nav {
+  background: color-mix(in srgb, var(--page) 88%, transparent) !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid var(--grid);
+}
+.myst-home-link img {
+  height: 32px;
+  width: auto;
+}
+.myst-home-link span {
+  font-size: 17px;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+
+/* Left table of contents: gray items, the current page in ink */
+.myst-toc,
+.myst-toc-item {
+  color: var(--muted);
+  font-size: 15px;
+}
+.myst-toc a.myst-toc-item.active,
+.myst-toc-item.active {
+  color: var(--ink);
+  font-weight: 500;
+  background: transparent;
+}
+/* An open group heading in ink, in place of the theme blue */
+.myst-toc [data-state="open"] > .myst-toc-item,
+.myst-toc [data-state="open"] > .myst-toc-item * {
+  color: var(--ink) !important;
+}
+.myst-toc-item:hover {
+  color: var(--ink);
+  background: var(--soft);
+}
+.myst-primary-sidebar-footer {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Right outline: a plain "Contents" label and gray entries */
+nav[aria-label="Document Outline"] {
+  color: var(--muted);
+}
+
+/* Title block: large medium-weight title, gray authors and subtitle */
+.myst-fm-block-title {
+  font-size: clamp(34px, 2.4vw + 20px, 52px) !important;
+  font-weight: 500 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.myst-fm-block-subtitle {
+  font-size: clamp(20px, 0.6vw + 17px, 23px) !important;
+  line-height: 1.5 !important;
+  color: var(--ink2) !important;
+  margin-top: 20px !important;
+  text-wrap: pretty;
+}
+.myst-fm-author {
+  font-weight: 400 !important;
+  color: var(--muted);
+}
+
+/* Body text: a little larger, with more space between sections */
+article.content {
+  font-size: 17px;
+  line-height: 1.65;
+}
+article.content h2 {
+  font-size: clamp(26px, 0.8vw + 22px, 34px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  margin-top: 48px;
+  color: var(--ink);
+}
+article.content h3 {
+  font-size: 21px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* Links: ink text with a thin gray underline that darkens on hover */
+article.content a:not(.myst-card):not(.myst-footer-link) {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--axis);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+article.content a:not(.myst-card):not(.myst-footer-link):hover {
+  text-decoration-color: var(--ink);
+}
+
+/* No underlines in the outline beside the page */
+article.content nav a {
+  text-decoration: none !important;
+}
+
