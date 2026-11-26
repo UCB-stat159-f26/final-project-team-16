@@ -101,8 +101,4 @@ Share of events in each hour of the day, 2021 to 2025. From [the clock notebook]
 - Data: where each table comes from, how it was cleaned, and what each column means.
 - [Contributions](contributions.ipynb): who did what, and what each of us learned.
 
-## Team
-
-Minchee Yang, John Hu, and Winny Wen.
-
 The code and data are on [GitHub](https://github.com/UCB-stat159-f26/final-project-team-16).
