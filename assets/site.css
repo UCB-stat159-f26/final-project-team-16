@@ -1,6 +1,9 @@
 /* Custom style of the project website. The colors match bpdtools/plots.py,
    so the figures sit on the same paper color as the page. */
 
+/* Serif font for headings, from Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap");
+
 /* Color tokens for light mode */
 :root {
   --page: #faf9f5;
@@ -12,6 +15,8 @@
   --axis: #b0aea5;
   --soft: #f0eee6;
   --accent: #d97757;
+  /* Serif for headings and big numbers; body text keeps the theme font */
+  --serif: "Newsreader", ui-serif, Georgia, serif;
 }
 
 /* Color tokens for dark mode; the theme sets the .dark class on <html> */
@@ -343,3 +348,16 @@ p.small {
   margin: 8px 0 4px;
 }
 
+/* Serif headings: page title, section headings, big numbers, card titles */
+.myst-fm-block-title,
+article.content h2,
+article.content h3,
+.glance .tile p:first-child,
+.parts .myst-card-title {
+  font-family: var(--serif);
+  /* Digits of equal height, so big numbers line up */
+  font-variant-numeric: lining-nums;
+}
+.parts .myst-card-title::before {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
