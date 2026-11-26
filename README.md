@@ -6,6 +6,8 @@ When and where do problems arise in Berkeley, and does police enforcement follow
 
 This repository holds the final project of Team 16 for STAT 159 at UC Berkeley, Fall 2026. The project uses open data from the [Berkeley Police Department Transparency Hub](https://bpd-transparency-initiative-berkeleypd.hub.arcgis.com/search).
 
+The project website at <https://ucb-stat159-f26.github.io/final-project-team-16/> contains the main report and every analysis notebook.
+
 ## Team
 
 - Minchee Yang

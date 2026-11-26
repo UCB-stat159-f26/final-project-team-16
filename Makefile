@@ -60,3 +60,12 @@ data:
 	conda run --no-capture-output --name $(ENV_NAME) python scripts/download_crime_cases.py
 	conda run --no-capture-output --name $(ENV_NAME) python scripts/prepare_crime_cases.py
 	conda run --no-capture-output --name $(ENV_NAME) python scripts/prepare_address_sectors.py
+
+# Build the website into _build/html with MyST, the same way the deploy
+# workflow does. Open _build/html/index.html, or run `myst start` in the
+# activated environment for a live preview. _build/ is a folder that git
+# ignores, so the target is phony.
+.PHONY: html
+## html: build the project website into _build/html
+html:
+	conda run --no-capture-output --name $(ENV_NAME) myst build --html
