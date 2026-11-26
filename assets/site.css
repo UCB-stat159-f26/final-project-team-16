@@ -228,3 +228,118 @@ article.content :not(pre) > code {
   border-color: var(--axis) !important;
 }
 
+/* ---- Home page parts ---- */
+
+/* Facts in the right margin: a small gray label over each value */
+.myst-aside.meta {
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.myst-aside.meta p {
+  margin: 0 0 22px;
+}
+.myst-aside.meta strong {
+  display: block;
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.myst-aside.meta img {
+  margin: 4px 0 0;
+}
+
+/* Opening paragraph in a larger size */
+.lead p {
+  font-size: 19px;
+  line-height: 1.6;
+  color: var(--ink2);
+}
+
+/* Row of four numbers split by hairlines; two per row on phones */
+.glance {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--grid);
+  border-top: 1px solid var(--grid);
+  border-bottom: 1px solid var(--grid);
+  margin: 40px 0 10px;
+}
+.glance .tile {
+  background: var(--page);
+  padding: 18px 16px 16px;
+}
+.glance .tile p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink2);
+}
+.glance .tile p:first-child {
+  font-size: 32px;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+.glance .tile p:first-child strong {
+  font-weight: 400;
+}
+@media (max-width: 680px) {
+  .glance {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.small p,
+p.small {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Cards for the four parts, numbered 01 to 04 */
+.parts {
+  counter-reset: part;
+}
+.parts .myst-card {
+  background: var(--surface);
+  border: 1px solid var(--grid) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  transition: border-color 0.18s ease;
+}
+.parts .myst-card:hover {
+  border-color: var(--axis) !important;
+}
+.parts .myst-card-body {
+  padding: 18px 20px 14px;
+}
+.parts .myst-card-title {
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--ink);
+  padding-top: 0;
+}
+.parts .myst-card-title::before {
+  counter-increment: part;
+  content: counter(part, decimal-leading-zero);
+  display: block;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.parts .myst-card p,
+.parts .myst-card li {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink2);
+}
+.parts .myst-card ul {
+  padding-left: 1.1em;
+  margin: 8px 0 4px;
+}
+
