@@ -159,3 +159,72 @@ article.content nav a {
   text-decoration: none !important;
 }
 
+/* Tables: hairline rules, gray header, no zebra stripes */
+article.content table {
+  border-top: 1px solid var(--axis);
+  border-bottom: 1px solid var(--axis);
+  font-size: 15px;
+}
+article.content th {
+  color: var(--muted);
+  font-weight: 500;
+}
+article.content thead th {
+  border-bottom: 1px solid var(--axis);
+}
+/* Less space between a heading and the table right under it */
+article.content div[aria-label="table content"] > table {
+  margin-top: 12px;
+}
+article.content td,
+article.content th {
+  border-bottom: 1px solid var(--grid);
+  padding: 8px 10px;
+  background: transparent;
+}
+
+/* Figures: a bordered card in the paper color of the PNG files. The card
+   keeps that color in dark mode too, so the figures never sit on black. */
+article.content figure {
+  background: #faf9f5;
+  border: 1px solid var(--grid);
+  border-radius: 12px;
+  padding: 20px 20px 12px;
+}
+article.content figure figcaption,
+article.content figure figcaption * {
+  color: #5e5d59;
+  font-size: 15px;
+}
+
+/* Code cells: a soft panel with a thin rule in place of the blue bar */
+article.content .myst-code {
+  border-color: var(--grid) !important;
+  border-left-color: var(--axis) !important;
+  border-radius: 8px;
+  box-shadow: none !important;
+  overflow: hidden;
+  background: var(--surface);
+}
+article.content .myst-code pre {
+  background: transparent !important;
+}
+
+/* Inline code: ink text on a soft chip in place of the pink default */
+article.content :not(pre) > code {
+  color: var(--ink2);
+  background: var(--soft);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+/* Previous and next links at the bottom of each page */
+.myst-footer-link {
+  border-color: var(--grid) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+.myst-footer-link:hover {
+  border-color: var(--axis) !important;
+}
+
