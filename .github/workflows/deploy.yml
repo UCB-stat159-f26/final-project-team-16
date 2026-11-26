@@ -25,11 +25,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  # Build the website and upload it as the Pages artifact.
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       # Get the files of the commit on main.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -43,10 +41,21 @@ jobs:
         run: npm install -g mystmd@1.13.0
       - name: Build the website
         run: myst build --html
-      # Hand the built pages to GitHub Pages and publish them.
+      # Hand the built pages to GitHub Pages.
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: ./_build/html
+
+  # Publish the site in its own job, which starts only after the build job
+  # has finished. In the same job, deploy-pages looked for the artifact right
+  # after the upload and did not find it yet.
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
