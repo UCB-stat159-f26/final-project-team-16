@@ -10,7 +10,10 @@ project:
     - name: John Hu
     - name: Winny Wen
   github: https://github.com/UCB-stat159-f26/final-project-team-16
-  license: MIT
+  # Code is MIT; the report text and figures are CC BY 4.0 (see LICENSE).
+  license:
+    content: CC-BY-4.0
+    code: MIT
   # Notebooks show the outputs saved in the repository; the site build does
   # not run them again.
   toc:
