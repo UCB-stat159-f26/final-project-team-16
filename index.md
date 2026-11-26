@@ -68,18 +68,31 @@ Noise calls peak at 23:00, when 17.2% of them come in. Assault cases peak at noo
 Share of events in each hour of the day, 2021 to 2025. From [the clock notebook](notebooks/03_clock.ipynb).
 :::
 
-## Research questions
+## Four parts
 
-| Section | Question |
-|---|---|
-| Context | How have traffic stops and collisions changed over time, and do they move together? |
-| Time | At what times of day and days of the week do noise complaints, assaults, and collisions peak? |
-| Time | How do the timing patterns of calls for service and police stops differ across types of calls and stops? |
-| Time | Do traffic stops happen at the same times as collisions, and does this differ between weekdays and weekends? |
-| Academic calendar | Do noise complaints and assaults near campus follow the academic calendar (semester vs. breaks) more than in the rest of Berkeley? |
-| Academic calendar | Do noise complaints, assaults, and alcohol-related collisions increase during events like home football games, move-in week, Halloween, and finals? |
-| Location | Do areas with more reckless-driving complaints also have more collisions and more traffic stops? |
-| Location | Are noise complaints concentrated in a few blocks, and do the same blocks stay hotspots over time? |
+::::{grid} 1 1 2 2
+:class: parts
+:::{card} Context
+:link: notebooks/02_trends.ipynb
+- How have traffic stops and collisions changed over time, and do they move together?
+:::
+:::{card} Time
+:link: notebooks/03_clock.ipynb
+- At what times of day and days of the week do noise complaints, assaults, and collisions peak?
+- How do the timing patterns of calls for service and police stops differ across types of calls and stops?
+- Do traffic stops happen at the same times as collisions, and does this differ between weekdays and weekends?
+:::
+:::{card} Academic calendar
+:link: notebooks/04_calendar.ipynb
+- Do noise complaints and assaults near campus follow the academic calendar (semester vs. breaks) more than in the rest of Berkeley?
+- Do noise complaints, assaults, and alcohol-related collisions increase during events like home football games, move-in week, Halloween, and finals?
+:::
+:::{card} Location
+:link: notebooks/06_driving_places.ipynb
+- Do areas with more reckless-driving complaints also have more collisions and more traffic stops?
+- Are noise complaints concentrated in a few blocks, and do the same blocks stay hotspots over time?
+:::
+::::
 
 ## Where to start
 
