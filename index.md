@@ -59,6 +59,15 @@ vehicle stops, Jan 2024 to May 2026
 Records in each processed table, from the [data overview](notebooks/01_data_overview.ipynb).
 :::
 
+## Three rhythms in one day
+
+Noise calls peak at 23:00, when 17.2% of them come in. Assault cases peak at noon and collisions at 17:00.
+
+:::{figure} figures/03_a2_hourly_profiles.png
+:alt: Share of noise calls, assault cases, and collisions in each hour of the day, 2021 to 2025.
+Share of events in each hour of the day, 2021 to 2025. From [the clock notebook](notebooks/03_clock.ipynb).
+:::
+
 ## Research questions
 
 | Section | Question |
