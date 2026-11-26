@@ -1,0 +1,10 @@
+first,second,n_first,n_second,overlap,p_value
+Noise calls,Traffic stops,12631,19024,0.601,0.0001
+Noise calls,Pedestrian stops,12631,2668,0.39,0.0001
+Battery calls,Traffic stops,5013,19024,0.812,0.0001
+Battery calls,Pedestrian stops,5013,2668,0.847,0.0001
+Reckless-driving calls,Traffic stops,2518,19024,0.753,0.0001
+Reckless-driving calls,Pedestrian stops,2518,2668,0.797,0.0001
+Other calls,Traffic stops,211469,19024,0.838,
+Other calls,Pedestrian stops,211469,2668,0.8,
+CFS traffic stops 2024-2025,Stop Data vehicle stops 2024-2025,8480,6310,0.937,

@@ -1,0 +1,505 @@
+events,weekday,hour,count
+Noise calls,Monday,0,141
+Noise calls,Monday,1,89
+Noise calls,Monday,2,68
+Noise calls,Monday,3,45
+Noise calls,Monday,4,25
+Noise calls,Monday,5,20
+Noise calls,Monday,6,19
+Noise calls,Monday,7,11
+Noise calls,Monday,8,8
+Noise calls,Monday,9,7
+Noise calls,Monday,10,13
+Noise calls,Monday,11,10
+Noise calls,Monday,12,14
+Noise calls,Monday,13,21
+Noise calls,Monday,14,15
+Noise calls,Monday,15,24
+Noise calls,Monday,16,30
+Noise calls,Monday,17,27
+Noise calls,Monday,18,24
+Noise calls,Monday,19,36
+Noise calls,Monday,20,62
+Noise calls,Monday,21,88
+Noise calls,Monday,22,176
+Noise calls,Monday,23,146
+Noise calls,Tuesday,0,133
+Noise calls,Tuesday,1,91
+Noise calls,Tuesday,2,42
+Noise calls,Tuesday,3,34
+Noise calls,Tuesday,4,26
+Noise calls,Tuesday,5,13
+Noise calls,Tuesday,6,14
+Noise calls,Tuesday,7,10
+Noise calls,Tuesday,8,10
+Noise calls,Tuesday,9,9
+Noise calls,Tuesday,10,13
+Noise calls,Tuesday,11,13
+Noise calls,Tuesday,12,11
+Noise calls,Tuesday,13,20
+Noise calls,Tuesday,14,13
+Noise calls,Tuesday,15,13
+Noise calls,Tuesday,16,23
+Noise calls,Tuesday,17,14
+Noise calls,Tuesday,18,35
+Noise calls,Tuesday,19,41
+Noise calls,Tuesday,20,54
+Noise calls,Tuesday,21,97
+Noise calls,Tuesday,22,181
+Noise calls,Tuesday,23,224
+Noise calls,Wednesday,0,143
+Noise calls,Wednesday,1,115
+Noise calls,Wednesday,2,65
+Noise calls,Wednesday,3,51
+Noise calls,Wednesday,4,32
+Noise calls,Wednesday,5,19
+Noise calls,Wednesday,6,21
+Noise calls,Wednesday,7,11
+Noise calls,Wednesday,8,15
+Noise calls,Wednesday,9,10
+Noise calls,Wednesday,10,10
+Noise calls,Wednesday,11,5
+Noise calls,Wednesday,12,12
+Noise calls,Wednesday,13,18
+Noise calls,Wednesday,14,13
+Noise calls,Wednesday,15,11
+Noise calls,Wednesday,16,25
+Noise calls,Wednesday,17,17
+Noise calls,Wednesday,18,29
+Noise calls,Wednesday,19,48
+Noise calls,Wednesday,20,52
+Noise calls,Wednesday,21,85
+Noise calls,Wednesday,22,156
+Noise calls,Wednesday,23,193
+Noise calls,Thursday,0,158
+Noise calls,Thursday,1,117
+Noise calls,Thursday,2,72
+Noise calls,Thursday,3,37
+Noise calls,Thursday,4,22
+Noise calls,Thursday,5,22
+Noise calls,Thursday,6,13
+Noise calls,Thursday,7,9
+Noise calls,Thursday,8,10
+Noise calls,Thursday,9,5
+Noise calls,Thursday,10,7
+Noise calls,Thursday,11,12
+Noise calls,Thursday,12,13
+Noise calls,Thursday,13,22
+Noise calls,Thursday,14,19
+Noise calls,Thursday,15,29
+Noise calls,Thursday,16,21
+Noise calls,Thursday,17,30
+Noise calls,Thursday,18,37
+Noise calls,Thursday,19,59
+Noise calls,Thursday,20,78
+Noise calls,Thursday,21,116
+Noise calls,Thursday,22,268
+Noise calls,Thursday,23,268
+Noise calls,Friday,0,197
+Noise calls,Friday,1,152
+Noise calls,Friday,2,114
+Noise calls,Friday,3,62
+Noise calls,Friday,4,25
+Noise calls,Friday,5,25
+Noise calls,Friday,6,20
+Noise calls,Friday,7,19
+Noise calls,Friday,8,9
+Noise calls,Friday,9,10
+Noise calls,Friday,10,12
+Noise calls,Friday,11,12
+Noise calls,Friday,12,14
+Noise calls,Friday,13,19
+Noise calls,Friday,14,24
+Noise calls,Friday,15,20
+Noise calls,Friday,16,46
+Noise calls,Friday,17,41
+Noise calls,Friday,18,51
+Noise calls,Friday,19,54
+Noise calls,Friday,20,128
+Noise calls,Friday,21,193
+Noise calls,Friday,22,495
+Noise calls,Friday,23,583
+Noise calls,Saturday,0,500
+Noise calls,Saturday,1,317
+Noise calls,Saturday,2,217
+Noise calls,Saturday,3,98
+Noise calls,Saturday,4,47
+Noise calls,Saturday,5,22
+Noise calls,Saturday,6,35
+Noise calls,Saturday,7,31
+Noise calls,Saturday,8,34
+Noise calls,Saturday,9,31
+Noise calls,Saturday,10,35
+Noise calls,Saturday,11,27
+Noise calls,Saturday,12,38
+Noise calls,Saturday,13,51
+Noise calls,Saturday,14,43
+Noise calls,Saturday,15,52
+Noise calls,Saturday,16,69
+Noise calls,Saturday,17,87
+Noise calls,Saturday,18,104
+Noise calls,Saturday,19,97
+Noise calls,Saturday,20,149
+Noise calls,Saturday,21,239
+Noise calls,Saturday,22,554
+Noise calls,Saturday,23,583
+Noise calls,Sunday,0,467
+Noise calls,Sunday,1,252
+Noise calls,Sunday,2,166
+Noise calls,Sunday,3,93
+Noise calls,Sunday,4,41
+Noise calls,Sunday,5,21
+Noise calls,Sunday,6,21
+Noise calls,Sunday,7,21
+Noise calls,Sunday,8,13
+Noise calls,Sunday,9,15
+Noise calls,Sunday,10,19
+Noise calls,Sunday,11,17
+Noise calls,Sunday,12,18
+Noise calls,Sunday,13,29
+Noise calls,Sunday,14,23
+Noise calls,Sunday,15,27
+Noise calls,Sunday,16,38
+Noise calls,Sunday,17,42
+Noise calls,Sunday,18,48
+Noise calls,Sunday,19,63
+Noise calls,Sunday,20,89
+Noise calls,Sunday,21,117
+Noise calls,Sunday,22,228
+Noise calls,Sunday,23,187
+Assault cases,Monday,0,12
+Assault cases,Monday,1,3
+Assault cases,Monday,2,7
+Assault cases,Monday,3,11
+Assault cases,Monday,4,0
+Assault cases,Monday,5,3
+Assault cases,Monday,6,5
+Assault cases,Monday,7,12
+Assault cases,Monday,8,20
+Assault cases,Monday,9,22
+Assault cases,Monday,10,23
+Assault cases,Monday,11,30
+Assault cases,Monday,12,46
+Assault cases,Monday,13,33
+Assault cases,Monday,14,44
+Assault cases,Monday,15,38
+Assault cases,Monday,16,35
+Assault cases,Monday,17,41
+Assault cases,Monday,18,28
+Assault cases,Monday,19,27
+Assault cases,Monday,20,21
+Assault cases,Monday,21,19
+Assault cases,Monday,22,20
+Assault cases,Monday,23,17
+Assault cases,Tuesday,0,11
+Assault cases,Tuesday,1,6
+Assault cases,Tuesday,2,6
+Assault cases,Tuesday,3,4
+Assault cases,Tuesday,4,7
+Assault cases,Tuesday,5,2
+Assault cases,Tuesday,6,9
+Assault cases,Tuesday,7,16
+Assault cases,Tuesday,8,16
+Assault cases,Tuesday,9,23
+Assault cases,Tuesday,10,26
+Assault cases,Tuesday,11,32
+Assault cases,Tuesday,12,44
+Assault cases,Tuesday,13,35
+Assault cases,Tuesday,14,39
+Assault cases,Tuesday,15,30
+Assault cases,Tuesday,16,44
+Assault cases,Tuesday,17,29
+Assault cases,Tuesday,18,24
+Assault cases,Tuesday,19,26
+Assault cases,Tuesday,20,25
+Assault cases,Tuesday,21,14
+Assault cases,Tuesday,22,20
+Assault cases,Tuesday,23,14
+Assault cases,Wednesday,0,15
+Assault cases,Wednesday,1,15
+Assault cases,Wednesday,2,5
+Assault cases,Wednesday,3,4
+Assault cases,Wednesday,4,2
+Assault cases,Wednesday,5,6
+Assault cases,Wednesday,6,9
+Assault cases,Wednesday,7,13
+Assault cases,Wednesday,8,16
+Assault cases,Wednesday,9,28
+Assault cases,Wednesday,10,31
+Assault cases,Wednesday,11,33
+Assault cases,Wednesday,12,46
+Assault cases,Wednesday,13,37
+Assault cases,Wednesday,14,37
+Assault cases,Wednesday,15,28
+Assault cases,Wednesday,16,20
+Assault cases,Wednesday,17,27
+Assault cases,Wednesday,18,24
+Assault cases,Wednesday,19,31
+Assault cases,Wednesday,20,22
+Assault cases,Wednesday,21,20
+Assault cases,Wednesday,22,20
+Assault cases,Wednesday,23,11
+Assault cases,Thursday,0,20
+Assault cases,Thursday,1,8
+Assault cases,Thursday,2,6
+Assault cases,Thursday,3,1
+Assault cases,Thursday,4,4
+Assault cases,Thursday,5,2
+Assault cases,Thursday,6,10
+Assault cases,Thursday,7,15
+Assault cases,Thursday,8,12
+Assault cases,Thursday,9,20
+Assault cases,Thursday,10,21
+Assault cases,Thursday,11,35
+Assault cases,Thursday,12,37
+Assault cases,Thursday,13,32
+Assault cases,Thursday,14,27
+Assault cases,Thursday,15,32
+Assault cases,Thursday,16,37
+Assault cases,Thursday,17,44
+Assault cases,Thursday,18,32
+Assault cases,Thursday,19,26
+Assault cases,Thursday,20,35
+Assault cases,Thursday,21,32
+Assault cases,Thursday,22,17
+Assault cases,Thursday,23,21
+Assault cases,Friday,0,22
+Assault cases,Friday,1,19
+Assault cases,Friday,2,12
+Assault cases,Friday,3,5
+Assault cases,Friday,4,5
+Assault cases,Friday,5,4
+Assault cases,Friday,6,5
+Assault cases,Friday,7,5
+Assault cases,Friday,8,23
+Assault cases,Friday,9,30
+Assault cases,Friday,10,21
+Assault cases,Friday,11,32
+Assault cases,Friday,12,42
+Assault cases,Friday,13,35
+Assault cases,Friday,14,37
+Assault cases,Friday,15,31
+Assault cases,Friday,16,31
+Assault cases,Friday,17,32
+Assault cases,Friday,18,38
+Assault cases,Friday,19,25
+Assault cases,Friday,20,23
+Assault cases,Friday,21,29
+Assault cases,Friday,22,32
+Assault cases,Friday,23,18
+Assault cases,Saturday,0,26
+Assault cases,Saturday,1,28
+Assault cases,Saturday,2,17
+Assault cases,Saturday,3,7
+Assault cases,Saturday,4,2
+Assault cases,Saturday,5,4
+Assault cases,Saturday,6,5
+Assault cases,Saturday,7,7
+Assault cases,Saturday,8,10
+Assault cases,Saturday,9,19
+Assault cases,Saturday,10,20
+Assault cases,Saturday,11,20
+Assault cases,Saturday,12,26
+Assault cases,Saturday,13,28
+Assault cases,Saturday,14,25
+Assault cases,Saturday,15,18
+Assault cases,Saturday,16,32
+Assault cases,Saturday,17,34
+Assault cases,Saturday,18,24
+Assault cases,Saturday,19,23
+Assault cases,Saturday,20,22
+Assault cases,Saturday,21,29
+Assault cases,Saturday,22,31
+Assault cases,Saturday,23,19
+Assault cases,Sunday,0,33
+Assault cases,Sunday,1,20
+Assault cases,Sunday,2,22
+Assault cases,Sunday,3,9
+Assault cases,Sunday,4,7
+Assault cases,Sunday,5,3
+Assault cases,Sunday,6,8
+Assault cases,Sunday,7,5
+Assault cases,Sunday,8,12
+Assault cases,Sunday,9,14
+Assault cases,Sunday,10,26
+Assault cases,Sunday,11,24
+Assault cases,Sunday,12,23
+Assault cases,Sunday,13,26
+Assault cases,Sunday,14,23
+Assault cases,Sunday,15,34
+Assault cases,Sunday,16,31
+Assault cases,Sunday,17,32
+Assault cases,Sunday,18,30
+Assault cases,Sunday,19,38
+Assault cases,Sunday,20,28
+Assault cases,Sunday,21,13
+Assault cases,Sunday,22,15
+Assault cases,Sunday,23,14
+Collisions,Monday,0,0
+Collisions,Monday,1,1
+Collisions,Monday,2,4
+Collisions,Monday,3,8
+Collisions,Monday,4,4
+Collisions,Monday,5,12
+Collisions,Monday,6,9
+Collisions,Monday,7,31
+Collisions,Monday,8,27
+Collisions,Monday,9,28
+Collisions,Monday,10,24
+Collisions,Monday,11,40
+Collisions,Monday,12,38
+Collisions,Monday,13,35
+Collisions,Monday,14,32
+Collisions,Monday,15,30
+Collisions,Monday,16,39
+Collisions,Monday,17,54
+Collisions,Monday,18,29
+Collisions,Monday,19,21
+Collisions,Monday,20,21
+Collisions,Monday,21,18
+Collisions,Monday,22,15
+Collisions,Monday,23,12
+Collisions,Tuesday,0,0
+Collisions,Tuesday,1,3
+Collisions,Tuesday,2,0
+Collisions,Tuesday,3,3
+Collisions,Tuesday,4,7
+Collisions,Tuesday,5,9
+Collisions,Tuesday,6,12
+Collisions,Tuesday,7,24
+Collisions,Tuesday,8,33
+Collisions,Tuesday,9,38
+Collisions,Tuesday,10,40
+Collisions,Tuesday,11,39
+Collisions,Tuesday,12,51
+Collisions,Tuesday,13,45
+Collisions,Tuesday,14,42
+Collisions,Tuesday,15,52
+Collisions,Tuesday,16,57
+Collisions,Tuesday,17,48
+Collisions,Tuesday,18,40
+Collisions,Tuesday,19,34
+Collisions,Tuesday,20,23
+Collisions,Tuesday,21,23
+Collisions,Tuesday,22,12
+Collisions,Tuesday,23,20
+Collisions,Wednesday,0,0
+Collisions,Wednesday,1,6
+Collisions,Wednesday,2,3
+Collisions,Wednesday,3,4
+Collisions,Wednesday,4,8
+Collisions,Wednesday,5,5
+Collisions,Wednesday,6,7
+Collisions,Wednesday,7,16
+Collisions,Wednesday,8,30
+Collisions,Wednesday,9,44
+Collisions,Wednesday,10,35
+Collisions,Wednesday,11,37
+Collisions,Wednesday,12,48
+Collisions,Wednesday,13,49
+Collisions,Wednesday,14,41
+Collisions,Wednesday,15,49
+Collisions,Wednesday,16,57
+Collisions,Wednesday,17,59
+Collisions,Wednesday,18,54
+Collisions,Wednesday,19,23
+Collisions,Wednesday,20,20
+Collisions,Wednesday,21,21
+Collisions,Wednesday,22,15
+Collisions,Wednesday,23,11
+Collisions,Thursday,0,0
+Collisions,Thursday,1,1
+Collisions,Thursday,2,3
+Collisions,Thursday,3,4
+Collisions,Thursday,4,5
+Collisions,Thursday,5,8
+Collisions,Thursday,6,8
+Collisions,Thursday,7,15
+Collisions,Thursday,8,35
+Collisions,Thursday,9,27
+Collisions,Thursday,10,41
+Collisions,Thursday,11,46
+Collisions,Thursday,12,47
+Collisions,Thursday,13,36
+Collisions,Thursday,14,49
+Collisions,Thursday,15,49
+Collisions,Thursday,16,50
+Collisions,Thursday,17,59
+Collisions,Thursday,18,45
+Collisions,Thursday,19,28
+Collisions,Thursday,20,29
+Collisions,Thursday,21,31
+Collisions,Thursday,22,20
+Collisions,Thursday,23,15
+Collisions,Friday,0,0
+Collisions,Friday,1,1
+Collisions,Friday,2,7
+Collisions,Friday,3,16
+Collisions,Friday,4,4
+Collisions,Friday,5,6
+Collisions,Friday,6,10
+Collisions,Friday,7,21
+Collisions,Friday,8,43
+Collisions,Friday,9,37
+Collisions,Friday,10,32
+Collisions,Friday,11,48
+Collisions,Friday,12,34
+Collisions,Friday,13,48
+Collisions,Friday,14,51
+Collisions,Friday,15,45
+Collisions,Friday,16,58
+Collisions,Friday,17,70
+Collisions,Friday,18,41
+Collisions,Friday,19,37
+Collisions,Friday,20,46
+Collisions,Friday,21,30
+Collisions,Friday,22,37
+Collisions,Friday,23,36
+Collisions,Saturday,0,0
+Collisions,Saturday,1,5
+Collisions,Saturday,2,9
+Collisions,Saturday,3,13
+Collisions,Saturday,4,11
+Collisions,Saturday,5,4
+Collisions,Saturday,6,10
+Collisions,Saturday,7,12
+Collisions,Saturday,8,20
+Collisions,Saturday,9,17
+Collisions,Saturday,10,29
+Collisions,Saturday,11,24
+Collisions,Saturday,12,35
+Collisions,Saturday,13,49
+Collisions,Saturday,14,40
+Collisions,Saturday,15,27
+Collisions,Saturday,16,23
+Collisions,Saturday,17,26
+Collisions,Saturday,18,41
+Collisions,Saturday,19,36
+Collisions,Saturday,20,30
+Collisions,Saturday,21,30
+Collisions,Saturday,22,24
+Collisions,Saturday,23,27
+Collisions,Sunday,0,0
+Collisions,Sunday,1,4
+Collisions,Sunday,2,7
+Collisions,Sunday,3,8
+Collisions,Sunday,4,14
+Collisions,Sunday,5,7
+Collisions,Sunday,6,5
+Collisions,Sunday,7,7
+Collisions,Sunday,8,6
+Collisions,Sunday,9,15
+Collisions,Sunday,10,23
+Collisions,Sunday,11,20
+Collisions,Sunday,12,31
+Collisions,Sunday,13,26
+Collisions,Sunday,14,27
+Collisions,Sunday,15,28
+Collisions,Sunday,16,41
+Collisions,Sunday,17,34
+Collisions,Sunday,18,21
+Collisions,Sunday,19,24
+Collisions,Sunday,20,23
+Collisions,Sunday,21,28
+Collisions,Sunday,22,20
+Collisions,Sunday,23,14

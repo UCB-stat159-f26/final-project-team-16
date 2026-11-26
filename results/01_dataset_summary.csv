@@ -1,0 +1,5 @@
+dataset,one_row_is,key,rows,first_local_date,last_local_date,rows_without_time
+Calls for Service,call,Incident Number,307628,2021-01-01,2025-12-31,0
+Crime cases,crime case,Case_Number,51418,2021-01-01,2025-12-31,0
+Collisions,collision,ObjectId,16639,2007-12-03,2026-11-01,101
+Vehicle stops,vehicle stop,LEA_Record_ID,7431,2024-01-01,2026-05-26,0

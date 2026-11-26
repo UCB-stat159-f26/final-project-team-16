@@ -1,0 +1,7 @@
+events,n,peak_hour,peak_hour_share,busiest_weekday,busiest_cell
+Noise calls,12693,23,0.172,Saturday,Friday 23:00
+Assault cases,3567,12,0.074,Friday,Monday 12:00
+Collisions,4213,17,0.083,Friday,Friday 17:00
+Assault cases without 00:00:00,3526,12,0.075,Friday,Monday 12:00
+Assault cases without 00:00:00 or 12:00:00,3461,17,0.069,Friday,Monday 14:00
+Collisions 06:00-23:59,3999,17,0.088,Friday,Friday 17:00
