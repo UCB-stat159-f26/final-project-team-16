@@ -38,3 +38,6 @@ site:
     logo_text: STAT 159 · Team 16
     favicon: assets/favicon-159.png
     style: assets/site.css
+  # Course line under the table of contents, in place of "Made with MyST"
+  parts:
+    primary_sidebar_footer: assets/sidebar-footer.md
