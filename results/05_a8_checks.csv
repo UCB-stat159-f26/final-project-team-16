@@ -1,0 +1,5 @@
+version,noise calls,top 1% share,top 5% share,top 10% share,mean top 20 shared,top 20 every year
+all blocks,12693,0.189,0.443,0.594,13.25,7
+without headquarters,12508,0.185,0.437,0.59,13.0,7
+without intersections,10757,0.16,0.42,0.577,13.5,7
+without both,10572,0.156,0.413,0.572,12.75,7
