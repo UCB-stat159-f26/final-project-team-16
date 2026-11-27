@@ -1,0 +1,34 @@
+# MyST settings and table of contents of the project website.
+# Build it locally with `make html`; GitHub Actions deploys it to Pages.
+version: 1
+project:
+  id: 31887556-6423-43d2-971b-1c96eb92a448
+  title: The rhythm of a college town
+  description: When and where do problems arise in Berkeley, and does police enforcement follow them? A STAT 159 project with Berkeley Police Department open data.
+  authors:
+    - name: Minchee Yang
+    - name: John Hu
+    - name: Winny Wen
+  github: https://github.com/UCB-stat159-f26/final-project-team-16
+  # Code is MIT; the report text and figures are CC BY 4.0 (see LICENSE).
+  license:
+    content: CC-BY-4.0
+    code: MIT
+  # Notebooks show the outputs saved in the repository; the site build does
+  # not run them again.
+  toc:
+    - file: index.md
+    - file: main.ipynb
+    # Every analysis notebook, in name order, so a new one appears by itself
+    - title: Analysis notebooks
+      children:
+        - pattern: notebooks/*.ipynb
+    # Where the data comes from and what each column means
+    - title: Data
+      children:
+        - file: data/README.md
+        - pattern: data/codebooks/*.md
+        - file: data/boundaries/README.md
+    - file: contributions.ipynb
+site:
+  template: book-theme

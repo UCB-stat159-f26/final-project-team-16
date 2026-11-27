@@ -1,10 +1,15 @@
 # The rhythm of a college town
 
 [![tests](https://github.com/UCB-stat159-f26/final-project-team-16/actions/workflows/tests.yml/badge.svg)](https://github.com/UCB-stat159-f26/final-project-team-16/actions/workflows/tests.yml)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/UCB-stat159-f26/final-project-team-16/HEAD?labpath=main.ipynb)
 
 When and where do problems arise in Berkeley, and does police enforcement follow them?
 
 This repository holds the final project of Team 16 for STAT 159 at UC Berkeley, Fall 2026. The project uses open data from the [Berkeley Police Department Transparency Hub](https://bpd-transparency-initiative-berkeleypd.hub.arcgis.com/search).
+
+The project website at <https://ucb-stat159-f26.github.io/final-project-team-16/> contains the main report and every analysis notebook.
+
+The Binder badge at the top of the README runs the notebooks online without installing anything. Binder builds the `bpd-rhythm` environment from `environment.yml` and opens `main.ipynb` in JupyterLab, and the first start can take several minutes.
 
 ## Team
 
@@ -57,3 +62,11 @@ make lint
 ```
 
 `make lint` runs `ruff check .` and then `ruff format --check .` inside the `bpd-rhythm` environment. The first command checks code style, import order, names, and docstrings in the NumPy style. The second command lists the files that `ruff format` would change. Both commands read their settings from `pyproject.toml` and also check the notebooks. To format a file, run `ruff format <file>` in the activated environment.
+
+### Rerunning the analysis
+
+```bash
+make all
+```
+
+`make all` runs every notebook in `notebooks/` in name order, followed by `main.ipynb` and `contributions.ipynb`, inside the `bpd-rhythm` environment. Each notebook runs in place with the `python3` kernel and rewrites its figures in `figures/` and its tables in `results/`. The command reads only files in the repository and does not download data. Run times are not saved in the notebooks, so a second run produces the same files.
