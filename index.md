@@ -61,7 +61,7 @@ Records in each processed table, from the [data overview](notebooks/01_data_over
 
 ## Three rhythms in one day
 
-Noise calls peak at 23:00, when 17.2% of them come in. Assault cases peak at noon and collisions at 17:00.
+Noise calls peak at 23:00, when 17.2% of them come in, and collisions peak at 17:00. Assault cases show a bump at noon, but 65 of the 264 cases in that hour were logged at exactly 12:00:00, which most likely stands for an unknown time. With those cases and the ones at exactly 00:00:00 set aside, assaults spread over the afternoon, and 17:00 is the highest hour at 6.9%.
 
 :::{figure} figures/03_a2_hourly_profiles.png
 :alt: Share of noise calls, assault cases, and collisions in each hour of the day, 2021 to 2025.
