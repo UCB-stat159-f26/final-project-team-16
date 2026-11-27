@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" role="img" aria-label="STAT 159">
+  <!-- Course mark: the number 159 in a blue hexagon -->
+  <polygon points="30,2 56,17 56,43 30,58 4,43 4,17" fill="#ffffff" stroke="#1155cc" stroke-width="3.5" stroke-linejoin="round"/>
+  <text x="30" y="38.5" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="21" font-weight="700" fill="#1155cc">159</text>
+</svg>

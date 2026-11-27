@@ -1,0 +1,363 @@
+/* Custom style of the project website. The colors match bpdtools/plots.py,
+   so the figures sit on the same paper color as the page. */
+
+/* Serif font for headings, from Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap");
+
+/* Color tokens for light mode */
+:root {
+  --page: #faf9f5;
+  --surface: #ffffff;
+  --ink: #141413;
+  --ink2: #30302e;
+  --muted: #5e5d59;
+  --grid: #e8e6dc;
+  --axis: #b0aea5;
+  --soft: #f0eee6;
+  --accent: #d97757;
+  /* Serif for headings and big numbers; body text keeps the theme font */
+  --serif: "Newsreader", ui-serif, Georgia, serif;
+}
+
+/* Color tokens for dark mode; the theme sets the .dark class on <html> */
+.dark {
+  --page: #141413;
+  --surface: #1f1e1d;
+  --ink: #faf9f5;
+  --ink2: #c9c7bf;
+  --muted: #87867f;
+  --grid: #30302e;
+  --axis: #5e5d59;
+  --soft: #262624;
+}
+
+/* Point the theme colors at the tokens above, in both modes */
+:root,
+.dark {
+  --myst-color-bg: var(--page);
+  --myst-color-bg-secondary: var(--soft);
+  --myst-color-surface: var(--soft);
+  --myst-color-surface-hover: var(--grid);
+  --myst-color-border: var(--grid);
+  --myst-color-border-strong: var(--axis);
+  --myst-color-text: var(--ink);
+  --myst-color-text-secondary: var(--muted);
+  --myst-color-text-tertiary: var(--muted);
+  --myst-color-prose-body: var(--ink2);
+  --myst-color-link: var(--ink);
+  --myst-color-link-hover: var(--ink);
+  --myst-color-link-underline: var(--axis);
+  --myst-color-active: var(--ink);
+  --myst-color-active-bg: var(--soft);
+  --myst-color-active-surface: var(--soft);
+  --myst-color-focus-outline: var(--accent);
+  --myst-color-focus-ring: var(--accent);
+}
+
+body {
+  background: var(--page);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Top bar: page color, a hairline under it, no shadow */
+.myst-top-nav {
+  background: color-mix(in srgb, var(--page) 88%, transparent) !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid var(--grid);
+}
+.myst-home-link img {
+  height: 32px;
+  width: auto;
+}
+.myst-home-link span {
+  font-size: 17px;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+
+/* Left table of contents: gray items, the current page in ink */
+.myst-toc,
+.myst-toc-item {
+  color: var(--muted);
+  font-size: 15px;
+}
+.myst-toc a.myst-toc-item.active,
+.myst-toc-item.active {
+  color: var(--ink);
+  font-weight: 500;
+  background: transparent;
+}
+/* An open group heading in ink, in place of the theme blue */
+.myst-toc [data-state="open"] > .myst-toc-item,
+.myst-toc [data-state="open"] > .myst-toc-item * {
+  color: var(--ink) !important;
+}
+.myst-toc-item:hover {
+  color: var(--ink);
+  background: var(--soft);
+}
+.myst-primary-sidebar-footer {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Right outline: a plain "Contents" label and gray entries */
+nav[aria-label="Document Outline"] {
+  color: var(--muted);
+}
+
+/* Title block: large medium-weight title, gray authors and subtitle */
+.myst-fm-block-title {
+  font-size: clamp(34px, 2.4vw + 20px, 52px) !important;
+  font-weight: 500 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.myst-fm-block-subtitle {
+  font-size: clamp(20px, 0.6vw + 17px, 23px) !important;
+  line-height: 1.5 !important;
+  color: var(--ink2) !important;
+  margin-top: 20px !important;
+  text-wrap: pretty;
+}
+.myst-fm-author {
+  font-weight: 400 !important;
+  color: var(--muted);
+}
+
+/* Body text: a little larger, with more space between sections */
+article.content {
+  font-size: 17px;
+  line-height: 1.65;
+}
+article.content h2 {
+  font-size: clamp(26px, 0.8vw + 22px, 34px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  margin-top: 48px;
+  color: var(--ink);
+}
+article.content h3 {
+  font-size: 21px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* Links: ink text with a thin gray underline that darkens on hover */
+article.content a:not(.myst-card):not(.myst-footer-link) {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--axis);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+article.content a:not(.myst-card):not(.myst-footer-link):hover {
+  text-decoration-color: var(--ink);
+}
+
+/* No underlines in the outline beside the page */
+article.content nav a {
+  text-decoration: none !important;
+}
+
+/* Tables: hairline rules, gray header, no zebra stripes */
+article.content table {
+  border-top: 1px solid var(--axis);
+  border-bottom: 1px solid var(--axis);
+  font-size: 15px;
+}
+article.content th {
+  color: var(--muted);
+  font-weight: 500;
+}
+article.content thead th {
+  border-bottom: 1px solid var(--axis);
+}
+/* Less space between a heading and the table right under it */
+article.content div[aria-label="table content"] > table {
+  margin-top: 12px;
+}
+article.content td,
+article.content th {
+  border-bottom: 1px solid var(--grid);
+  padding: 8px 10px;
+  background: transparent;
+}
+
+/* Figures: a bordered card in the paper color of the PNG files. The card
+   keeps that color in dark mode too, so the figures never sit on black. */
+article.content figure {
+  background: #faf9f5;
+  border: 1px solid var(--grid);
+  border-radius: 12px;
+  padding: 20px 20px 12px;
+}
+article.content figure figcaption,
+article.content figure figcaption * {
+  color: #5e5d59;
+  font-size: 15px;
+}
+
+/* Code cells: a soft panel with a thin rule in place of the blue bar */
+article.content .myst-code {
+  border-color: var(--grid) !important;
+  border-left-color: var(--axis) !important;
+  border-radius: 8px;
+  box-shadow: none !important;
+  overflow: hidden;
+  background: var(--surface);
+}
+article.content .myst-code pre {
+  background: transparent !important;
+}
+
+/* Inline code: ink text on a soft chip in place of the pink default */
+article.content :not(pre) > code {
+  color: var(--ink2);
+  background: var(--soft);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+/* Previous and next links at the bottom of each page */
+.myst-footer-link {
+  border-color: var(--grid) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+.myst-footer-link:hover {
+  border-color: var(--axis) !important;
+}
+
+/* ---- Home page parts ---- */
+
+/* Facts in the right margin: a small gray label over each value */
+.myst-aside.meta {
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.myst-aside.meta p {
+  margin: 0 0 22px;
+}
+.myst-aside.meta strong {
+  display: block;
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.myst-aside.meta img {
+  margin: 4px 0 0;
+}
+
+/* Opening paragraph in a larger size */
+.lead p {
+  font-size: 19px;
+  line-height: 1.6;
+  color: var(--ink2);
+}
+
+/* Row of four numbers split by hairlines; two per row on phones */
+.glance {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--grid);
+  border-top: 1px solid var(--grid);
+  border-bottom: 1px solid var(--grid);
+  margin: 40px 0 10px;
+}
+.glance .tile {
+  background: var(--page);
+  padding: 18px 16px 16px;
+}
+.glance .tile p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink2);
+}
+.glance .tile p:first-child {
+  font-size: 32px;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+.glance .tile p:first-child strong {
+  font-weight: 400;
+}
+@media (max-width: 680px) {
+  .glance {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.small p,
+p.small {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Cards for the four parts, numbered 01 to 04 */
+.parts {
+  counter-reset: part;
+}
+.parts .myst-card {
+  background: var(--surface);
+  border: 1px solid var(--grid) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  transition: border-color 0.18s ease;
+}
+.parts .myst-card:hover {
+  border-color: var(--axis) !important;
+}
+.parts .myst-card-body {
+  padding: 18px 20px 14px;
+}
+.parts .myst-card-title {
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--ink);
+  padding-top: 0;
+}
+.parts .myst-card-title::before {
+  counter-increment: part;
+  content: counter(part, decimal-leading-zero);
+  display: block;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.parts .myst-card p,
+.parts .myst-card li {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink2);
+}
+.parts .myst-card ul {
+  padding-left: 1.1em;
+  margin: 8px 0 4px;
+}
+
+/* Serif headings: page title, section headings, big numbers, card titles */
+.myst-fm-block-title,
+article.content h2,
+article.content h3,
+.glance .tile p:first-child,
+.parts .myst-card-title {
+  font-family: var(--serif);
+  /* Digits of equal height, so big numbers line up */
+  font-variant-numeric: lining-nums;
+}
+.parts .myst-card-title::before {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}

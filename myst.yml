@@ -18,7 +18,10 @@ project:
   # not run them again.
   toc:
     - file: index.md
+    # The report has the same title as the home page, so give it a short
+    # name in the table of contents
     - file: main.ipynb
+      title: Report
     # Every analysis notebook, in name order, so a new one appears by itself
     - title: Analysis notebooks
       children:
@@ -32,3 +35,12 @@ project:
     - file: contributions.ipynb
 site:
   template: book-theme
+  # Course logo in the top bar and the browser tab, and our own page style
+  options:
+    logo: assets/logo-159.svg
+    logo_text: STAT 159 · Team 16
+    favicon: assets/favicon-159.png
+    style: assets/site.css
+  # Course line under the table of contents, in place of "Made with MyST"
+  parts:
+    primary_sidebar_footer: assets/sidebar-footer.md
