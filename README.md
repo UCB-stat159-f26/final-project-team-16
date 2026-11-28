@@ -50,6 +50,23 @@ The full results, checks, and limits are in the main report at [`main.ipynb`](ma
 
 ![Share of noise calls, assault cases, and collisions in each hour of the day, 2021 to 2025](figures/03_a2_hourly_profiles.png)
 
+## Data
+
+All four datasets come from the BPD Transparency Hub. We store a snapshot of each dataset in this repository, so the analysis runs offline and produces the same numbers on every run.
+
+| Dataset | Source | Downloaded | Files in the repository | Records |
+|---|---|---|---|---:|
+| Calls for Service | [Calls for Service, 2019 - Current](https://www.arcgis.com/sharing/rest/content/items/272dfb0d5c5144679368fb2f97422a35/data) | 2026-11-23 | `data/processed/calls_2021_2025.csv.gz` | 307,628 calls |
+| Crime Data | [Crime cases with map points (`cases_latlon`)](https://services7.arcgis.com/vIHhVXjE1ToSg0Fz/arcgis/rest/services/cases_latlon/FeatureServer/0) | 2026-11-23 | `data/processed/crime_cases_2021_2025.csv.gz` | 51,418 cases |
+| Collision Data | [Collision Data](https://bpd-transparency-initiative-berkeleypd.hub.arcgis.com/datasets/fcb1720b81844fed9d2212ffe2f35c74/explore) | 2026-11-22 | `data/raw/collision_data.csv`, `data/processed/collisions.csv` | 16,639 collisions |
+| Stop Data | [Stop Data](https://bpd-transparency-initiative-berkeleypd.hub.arcgis.com/datasets/078f7d987228453ca30cf7a99311d8de/about) | 2026-11-22 | `data/raw/stop_data.csv`, `data/processed/vehicle_stops.csv` | 7,431 vehicle stops |
+
+- **Analysis window:** Calls for service and crime cases cover 2021-01-01 to 2025-12-31. Vehicle stops start in January 2024, so every comparison with stops uses 2024 to 2025.
+- **Raw files:** The raw Calls for Service file (about 58 MB) and the raw crime file (about 30 MB) change every day at the source, so we store the 2021 to 2025 tables built from them as compressed CSV files. Running `make data` downloads fresh raw files into `data/downloads/` and rebuilds the tables, so the rebuilt tables can differ from the stored snapshot.
+- **Additional sources:** Police beat polygons from the City of Berkeley live in `data/boundaries/`. Fall 2024 semester, break, and event dates live in `data/calendar/`, each with a link to its source.
+- **Documentation:** [`data/README.md`](data/README.md) lists the sources, snapshot dates, checksums, and counting rules for stops and collisions. The codebooks in [`data/codebooks/`](data/codebooks) explain each column of the calls, crime cases, collisions, vehicle stops, calendar, and address lookup tables.
+- **Counting rules:** Raw stops can list multiple people and raw crime cases can list multiple statutes, so our prepared tables keep one row per stop and per case. All times are local time in the `America/Los_Angeles` time zone.
+
 ## Getting started
 
 You need conda (for example from [Miniforge](https://github.com/conda-forge/miniforge)), `make`, and `git`. On Windows, use WSL and install Miniforge inside it, because `make` is not part of Windows. If `make` is missing in WSL, install it with `sudo apt install make`.
