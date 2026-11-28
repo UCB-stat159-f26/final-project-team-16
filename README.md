@@ -67,6 +67,48 @@ All four datasets come from the BPD Transparency Hub. We store a snapshot of eac
 - **Documentation:** [`data/README.md`](data/README.md) lists the sources, snapshot dates, checksums, and counting rules for stops and collisions. The codebooks in [`data/codebooks/`](data/codebooks) explain each column of the calls, crime cases, collisions, vehicle stops, calendar, and address lookup tables.
 - **Counting rules:** Raw stops can list multiple people and raw crime cases can list multiple statutes, so our prepared tables keep one row per stop and per case. All times are local time in the `America/Los_Angeles` time zone.
 
+## Repository structure
+
+```text
+final-project-team-16/
+├── README.md                 # this file
+├── main.ipynb                # main report: shows saved figures and tables, no computation
+├── contributions.ipynb       # what each member did, and personal reflections
+├── index.md                  # home page of the website
+├── notebooks/                # analysis notebooks, run in name order
+│   ├── 01_data_overview.ipynb     # what the four tables hold and their limits
+│   ├── 02_trends.ipynb            # A1: stops and collisions by month
+│   ├── 03_clock.ipynb             # A2, A6, A7: hour of day and day of week
+│   ├── 04_calendar.ipynb          # A3, A4: semester, break, and event days
+│   ├── 05_noise_hotspots.ipynb    # A8: noise calls by block
+│   └── 06_driving_places.ipynb    # A5: driving calls, collisions, and stops by beat
+├── bpdtools/                 # the project's Python package, imported by the notebooks
+├── tests/                    # pytest unit tests, one file per bpdtools module
+├── scripts/                  # scripts that download the data and build the tables
+├── data/
+│   ├── README.md             # sources, snapshot dates, and counting rules
+│   ├── raw/                  # stop and collision files as downloaded
+│   ├── processed/            # tables that the notebooks read and write
+│   ├── calendar/             # Fall 2024 semester, break, and event dates
+│   ├── mappings/             # classification of collision factors
+│   ├── boundaries/           # police beat polygons
+│   └── codebooks/            # what each column means
+├── figures/                  # figures that the notebooks save
+├── results/                  # result tables that the notebooks save
+├── assets/                   # logo, icon, and style of the website
+├── environment.yml           # conda environment bpd-rhythm
+├── Makefile                  # env, all, test, lint, data, and html targets
+├── pyproject.toml            # settings of the package, pytest, and ruff
+├── myst.yml                  # settings and table of contents of the website
+├── .github/                  # test and deploy workflows, pull request template
+├── CONTRIBUTING.md           # how the team works with issues, branches, and reviews
+├── LICENSE                   # licenses for code, text and figures, and data
+├── instructions.md           # project instructions from the course
+├── .gitignore                # files that git does not track
+├── .gitattributes            # line ending rules, so data files keep their bytes
+└── .editorconfig             # editor settings for indentation and line endings
+```
+
 ## Getting started
 
 You need conda (for example from [Miniforge](https://github.com/conda-forge/miniforge)), `make`, and `git`. On Windows, use WSL and install Miniforge inside it, because `make` is not part of Windows. If `make` is missing in WSL, install it with `sudo apt install make`.
