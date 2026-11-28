@@ -38,6 +38,18 @@ Our analysis is organized into four sections: context, time, academic calendar, 
 
 Every notebook works with counts of recorded events. `01_data_overview.ipynb` checks table contents and time reliability first. The trends notebook correlates monthly stops and collisions (Pearson and Spearman). The clock notebook builds 24-hour share profiles, measures overlap from 0 to 1, and runs a fixed-seed permutation test with 9,999 shuffles. The calendar notebook compares Fall 2024 semester and winter break daily rates by area, plus event days with matched ordinary days. The location notebooks rank the 14 police beats with Spearman correlation and measure the share of noise calls in the busiest blocks. Each notebook saves its result tables, four of them also save figures, and `main.ipynb` reports them.
 
+### Key findings
+
+- From 2021 to 2025, 56% of the 12,693 noise calls came between 22:00 and 01:59, peaking at 23:00, while collisions peaked at 17:00.
+- In Southside, the beats south of campus, noise calls averaged 3.73 per day during the Fall 2024 semester and 0.71 during winter break. The semester rate was 5.27 times the break rate there and 1.88 times in the other beats.
+- Vehicle stops shared more timing with collisions on weekdays (overlap 0.81) than on weekends (overlap 0.72), and monthly totals in 2024 to 2025 did not move together (Pearson r = -0.03 over 24 months).
+- Across the 14 police beats in 2024 to 2025, beats with more reckless-driving calls also had more collisions (Spearman ρ = 0.753), while the link between those calls and vehicle stops was weak (0.191).
+- Noise calls were concentrated in a few blocks, with the busiest 5% of blocks (81 of 1,626) holding 44.3% of all calls and seven blocks ranking in the top 20 in all five years.
+
+The full results, checks, and limits are in the main report at [`main.ipynb`](main.ipynb).
+
+![Share of noise calls, assault cases, and collisions in each hour of the day, 2021 to 2025](figures/03_a2_hourly_profiles.png)
+
 ## Getting started
 
 You need conda (for example from [Miniforge](https://github.com/conda-forge/miniforge)), `make`, and `git`. On Windows, use WSL and install Miniforge inside it, because `make` is not part of Windows. If `make` is missing in WSL, install it with `sudo apt install make`.
