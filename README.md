@@ -189,3 +189,7 @@ from bpdtools.load import load_calls
 calls = load_calls()
 profile = hourly_profile(calls, time_column="local_time", group_column="call_group")
 ```
+
+## Website
+
+The project website is at <https://ucb-stat159-f26.github.io/final-project-team-16/>. Built with MyST from `myst.yml`, it displays the home page, main report, analysis notebooks, data documentation, and contributions notebook. Run `make html` to build the pages locally into `_build/html`, or run `myst start` in the activated environment for a live preview.
