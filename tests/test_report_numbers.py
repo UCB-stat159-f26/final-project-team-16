@@ -468,6 +468,59 @@ def location_claims():
     return claims
 
 
+def conclusion_claims():
+    """Build the quoted pieces of the Conclusion.
+
+    Returns
+    -------
+    list of str
+        Pieces of sentences that repeat results of the earlier sections,
+        with their numbers filled in from the same saved tables.
+    """
+    peaks = result("03_a2_peaks").set_index("events")
+    counts = result("03_a2_hour_weekday_counts")
+    a6_overlap = result("03_a6_overlap").set_index(["first", "second"])["overlap"]
+    a7_overlap = result("03_a7_overlap").set_index(["days", "hours"])["overlap"]
+    weekend_stops = result("03_a7_hourly_profiles").set_index("hour")[
+        "Weekends, Vehicle stops"
+    ]
+    rates = processed("a3_period_rates").set_index(
+        ["outcome", "definition", "area", "period"]
+    )
+    beats = processed("a5_driving_by_beat").set_index("beat")
+
+    noise = counts[counts["events"].eq("Noise calls")]
+    night = noise.loc[noise["hour"].isin([22, 23, 0, 1]), "count"].sum()
+    night_share = night / noise["count"].sum()
+    busiest_day, busiest_time = peaks.loc["Noise calls", "busiest_cell"].split()
+    semester = rates.loc[("noise", "southside", "near", "semester")]
+    winter = rates.loc[("noise", "southside", "near", "winter_break")]
+    other = rates.loc[("noise", "southside", "other", "semester")]
+    late = weekend_stops.loc[19:23].sum() + weekend_stops.loc[0]
+    with_calls = beats.corr(method="spearman")["reckless_calls"]
+    traffic, all_hours = "Traffic stops", "00:00-23:59"
+    return [
+        f"{night_share:.0%} in 2021–2025 came between 22:00 and 01:59,"
+        f" peaking {busiest_day} at {busiest_time}",
+        f"noise calls averaged {semester['daily_rate']:.2f} per day in the Fall 2024"
+        f" semester and {winter['daily_rate']:.2f} in winter break, a semester rate"
+        f" {semester['semester_to_break_ratio']:.2f} times the break rate, compared"
+        f" with {other['semester_to_break_ratio']:.2f} times in the other beats",
+        f"collisions peak at {clock(peaks.loc['Collisions', 'peak_hour'])}, and assault"
+        " cases spread",
+        "traffic stops share the least timing with noise calls (overlap"
+        f" {a6_overlap['Noise calls', traffic]:.2f}) and more with battery"
+        f" ({a6_overlap['Battery calls', traffic]:.2f}) and reckless-driving calls"
+        f" ({a6_overlap['Reckless-driving calls', traffic]:.2f})",
+        f"on weekdays ({a7_overlap['Weekdays', all_hours]:.2f}) than on weekends"
+        f" ({a7_overlap['Weekends', all_hours]:.2f}), when {late:.0%} of stops happen"
+        " between 19:00 and 00:59",
+        f"Across Berkeley's {len(beats)} police beats in 2024–2025",
+        f"tended to have more collisions (Spearman ρ = {with_calls['collisions']:.3f})",
+        f"vehicle stops was weak ({with_calls['vehicle_stops']:.3f})",
+    ]
+
+
 # One group of claims per section of the report, named for the test output.
 REPORT_SECTIONS = {
     "data": data_claims,
@@ -475,6 +528,7 @@ REPORT_SECTIONS = {
     "time": time_claims,
     "calendar": calendar_claims,
     "location": location_claims,
+    "conclusion": conclusion_claims,
 }
 
 
