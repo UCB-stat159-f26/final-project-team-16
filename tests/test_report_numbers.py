@@ -13,6 +13,9 @@ import pandas as pd
 import pytest
 
 from bpdtools.clock import DEFAULT_PERMUTATIONS
+from bpdtools.config import HEADQUARTERS_ADDRESS
+from bpdtools.hotspots import block_counts
+from bpdtools.load import load_calls
 from bpdtools.paths import repo_path
 
 # Text that can never be in a document. A claim uses it when the saved
@@ -374,12 +377,104 @@ def calendar_claims():
     ]
 
 
+def location_claims():
+    """Build the quoted pieces of the Location section.
+
+    Returns
+    -------
+    list of str
+        Pieces of sentences with their numbers filled in from the tables
+        that notebooks 05 and 06 save, and from the calls table for the two
+        counts that no result table holds.
+    """
+    beats = processed("a5_driving_by_beat").set_index("beat")
+    blocks = result("05_a8_block_counts")
+    concentration = result("05_a8_concentration")
+    checks = result("05_a8_checks").set_index("version")
+    stability = result("05_a8_top_overlap")
+    calls = load_calls()
+
+    # A5: rank correlation of reckless-driving calls with the other counts
+    with_calls = beats.corr(method="spearman")["reckless_calls"]
+    reckless = calls[calls["call_group"].eq("reckless")]
+    eligible = reckless["local_time"].dt.year.isin([2024, 2025]).sum()
+    claims = [
+        f"Among Berkeley’s {len(beats)} police beats in 2024–2025",
+        f"more recorded collisions (Spearman ρ = {with_calls['collisions']:.3f})",
+        f"vehicle-stop counts was weaker ({with_calls['vehicle_stops']:.3f})",
+        f"Of {eligible:,} eligible calls, {beats['reckless_calls'].sum():,} could be"
+        " assigned to a beat",
+        "the calls–collisions correlation was still"
+        f" {with_calls['alternate_collisions']:.3f}",
+    ]
+
+    # A8: how concentrated noise calls are
+    top = [
+        f"the busiest {row.fraction:.0%} ({row.n_blocks}) hold {row.share:.1%}"
+        for row in concentration.itertuples()
+    ]
+    without = checks.drop(index="all blocks")["top 5% share"]
+    intersections = blocks["block"].str.contains("&").sum()
+    noise_calls = checks.loc["all blocks", "noise calls"]
+    claims += [
+        f"The {noise_calls:,} noise calls of 2021–2025 fall on {len(blocks):,} block"
+        " addresses and intersections",
+        f"The busiest {concentration['fraction'][0]:.0%} of blocks"
+        f" ({concentration['n_blocks'][0]}) hold {concentration['share'][0]:.1%} of the"
+        f" noise calls, {top[1]}, and {top[2]}",
+        supported(
+            blocks["block"][0] == "2700 CHANNING WAY",
+            "The busiest block, the 2700 block of Channing Way, had"
+            f" {blocks['count'][0]} noise calls",
+        ),
+        supported(
+            blocks["block"][4] == HEADQUARTERS_ADDRESS,
+            "The fifth-busiest block, 2100 Martin Luther King Jr Way, is the police"
+            f" headquarters, and its {blocks['count'][4]} calls",
+        ),
+        f"without the {intersections} intersections, or without both, the busiest 5% of"
+        f" blocks still hold between {without.min():.1%} and {without.max():.1%} of the"
+        " noise calls",
+    ]
+
+    # A8: how many top blocks stay in the top list of the next year
+    def shared(cutoff):
+        """Give the lowest and highest yearly share of a top list that stays."""
+        shares = stability.loc[stability["cutoff"].eq(cutoff), "share_shared"]
+        return f"{shares.min():.0%}", f"{shares.max():.0%}"
+
+    every_year = checks["top 20 every year"]
+    noise = calls[calls["call_group"].eq("noise")]
+    shattuck = {
+        year: block_counts(noise[noise["local_time"].dt.year.eq(year)]).get(
+            "2000 SHATTUCK AVE", 0
+        )
+        for year in (2021, 2022, 2025)
+    }
+    claims += [
+        f"between {shared(20)[0]} and {shared(20)[1]} of a year's top 20 blocks",
+        f"With a top 10 instead, the overlap was {shared(10)[0]} to {shared(10)[1]},"
+        f" and with a top 50 it was {shared(50)[0]} to {shared(50)[1]}",
+        f"{NUMBER_WORDS[every_year['all blocks']].capitalize()} blocks were in the top"
+        " 20 in all five years",
+        supported(
+            every_year.drop(index="all blocks").nunique() == 1,
+            f"{NUMBER_WORDS[every_year['without both']]} blocks still stayed in the top"
+            " 20 every year",
+        ),
+        f"the 2000 block of Shattuck Avenue had {shattuck[2022]} noise calls in 2022"
+        f" but {shattuck[2021]} in 2021 and {shattuck[2025]} in 2025",
+    ]
+    return claims
+
+
 # One group of claims per section of the report, named for the test output.
 REPORT_SECTIONS = {
     "data": data_claims,
     "context": context_claims,
     "time": time_claims,
     "calendar": calendar_claims,
+    "location": location_claims,
 }
 
 
