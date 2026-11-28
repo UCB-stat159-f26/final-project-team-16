@@ -1,0 +1,5 @@
+event,event_days,matched_days,event_noise_calls,mean_control_noise_calls,event_assault_cases,mean_control_assault_cases,event_alcohol_collisions,mean_control_alcohol_collisions
+home_football,7,7,19.714285714285715,17.0,1.8571428571428572,3.619047619047619,0.2857142857142857,0.047619047619047616
+move_in,2,1,7.0,6.0,3.0,1.0,0.0,0.0
+halloween,1,1,16.0,6.0,1.0,5.0,0.0,0.0
+finals,5,4,4.0,4.25,1.75,2.25,0.0,0.0
