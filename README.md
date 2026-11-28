@@ -122,28 +122,38 @@ make env
 conda activate bpd-rhythm
 ```
 
-`make env` creates the conda environment `bpd-rhythm` from `environment.yml`. If the environment already exists, the same command updates it to match the file. Run `make help` to list all targets.
+`make env` creates the conda environment `bpd-rhythm` from `environment.yml`. If the environment already exists, the same command updates it to match the file. The environment also installs the project's own package, `bpdtools`, from this folder.
 
-### Running the tests
+## Running the analysis
+
+```bash
+make all
+```
+
+`make all` runs every notebook in `notebooks/` in name order, followed by `main.ipynb` and `contributions.ipynb`, inside the `bpd-rhythm` environment. The whole run takes about half a minute. Each notebook runs in place with the `python3` kernel and rewrites the figures and tables that it saves. The command reads only files in the repository and does not download data. Run times are not saved in the notebooks, so a second run produces the same files.
+
+The `Makefile` has one target for each task. Run `make help` to list them.
+
+| Command | What it does |
+|---|---|
+| `make env` | Create the `bpd-rhythm` environment, or update it when it exists |
+| `make all` | Run every notebook in `notebooks/`, then `main.ipynb` and `contributions.ipynb` |
+| `make test` | Run the unit tests in `tests/` |
+| `make lint` | Check code style, names, and docstrings with ruff |
+| `make data` | Download the raw Calls for Service and crime files and rebuild their tables (needs the internet) |
+| `make html` | Build the website into `_build/html` |
+| `make help` | List the targets |
+
+## Testing
 
 ```bash
 make test
 ```
 
-`make test` runs `python -m pytest` inside the `bpd-rhythm` environment. pytest reads its settings from `pyproject.toml`, runs the tests in `tests/`, and treats every warning as an error.
-
-### Checking the code
+`make test` runs `python -m pytest` inside the `bpd-rhythm` environment. pytest reads its settings from `pyproject.toml`, runs the tests in `tests/`, and treats every warning as an error. Each `bpdtools` module with functions has a matching test file in `tests/`. Most tests build a small table and check the real function on it, and the whole run finishes in about a second.
 
 ```bash
 make lint
 ```
 
 `make lint` runs `ruff check .` and then `ruff format --check .` inside the `bpd-rhythm` environment. The first command checks code style, import order, names, and docstrings in the NumPy style. The second command lists the files that `ruff format` would change. Both commands read their settings from `pyproject.toml` and also check the notebooks. To format a file, run `ruff format <file>` in the activated environment.
-
-### Rerunning the analysis
-
-```bash
-make all
-```
-
-`make all` runs every notebook in `notebooks/` in name order, followed by `main.ipynb` and `contributions.ipynb`, inside the `bpd-rhythm` environment. Each notebook runs in place with the `python3` kernel and rewrites its figures in `figures/` and its tables in `results/`. The command reads only files in the repository and does not download data. Run times are not saved in the notebooks, so a second run produces the same files.
