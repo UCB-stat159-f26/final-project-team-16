@@ -1,6 +1,6 @@
 # Collisions
 
-[Collisions](../processed/collisions.csv) contains one row per recorded collision, including undated collisions. The [preparation script](../../scripts/prepare_collisions.py) preserves all 16,639 records in the November 22, 2026 snapshot and adds the primary collision factor (PCF) classification. Missing counts below refer to empty CSV fields.
+[Collisions](../processed/collisions.csv) contains one row per recorded collision, including undated collisions. The [preparation script](../../scripts/prepare_collisions.py) preserves all 16,639 records in the November 22, 2026 snapshot and adds the primary collision factor (PCF) classification. Missing counts below refer to empty CSV fields except where a literal missing-value marker is specified.
 
 | Field | Type | Meaning and values | Missing |
 |---|---|---|---|
@@ -10,7 +10,7 @@
 | `Time` | Time | Local time, HH:MM:SS in America/Los_Angeles. | 101 |
 | `Month` | Integer | Local calendar month, 1–12. | 101 |
 | `Year` | Integer | Local calendar year, 2007–2026 in this snapshot, with gaps. | 101 |
-| `Day of Week` | Integer | Local weekday, Monday = 0 through Sunday = 6. | 101 |
+| `Day of Week` | Numeric | Local weekday stored as decimal text, Monday = `0.0` through Sunday = `6.0`. | 101 literal `nan` values |
 | `Hour` | Integer | Local hour on the 24-hour clock. Only 1–23 appear in this snapshot. | 101 |
 | `Accident Location` | Text | Reported street or intersection, with source spelling and abbreviations. | 0 |
 | `PCF Description` | Text | Detailed recorded primary factor, often a vehicle-code citation and description. | 0 |
