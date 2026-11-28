@@ -203,3 +203,14 @@ The project website is at <https://ucb-stat159-f26.github.io/final-project-team-
 - Winny Wen
 
 [`contributions.ipynb`](contributions.ipynb) describes what each member did and holds each member's personal reflections. [`CONTRIBUTING.md`](CONTRIBUTING.md) outlines how we work with issues, branches, and reviews.
+
+## License
+
+| Material | License |
+|---|---|
+| Code, including scripts and notebook code cells | MIT |
+| Report text, notebook prose, and figures | CC BY 4.0 |
+| The team's own data contributions (calendar flags, event windows, classification mappings, derived columns) | CC0 1.0 |
+| Berkeley Police Department records and other third-party material | The terms of each provider |
+
+The full terms are in [`LICENSE`](LICENSE). We license code, text and media, and data separately so each type of material can be reused with credit.
