@@ -58,11 +58,6 @@ NOT_RESULTS = {
 HOME_NOT_RESULTS = {"159", "16", "2026"}
 
 
-# Numbers that no saved table holds yet. They come from the boundary check
-# in notebooks/06_driving_places.ipynb, which prints them without saving.
-NOT_SAVED_YET = {"59", "58"}
-
-
 def plain_text(markdown):
     """Reduce Markdown to the words a reader sees, on one line.
 
@@ -451,6 +446,11 @@ def location_claims():
     with_calls = beats.corr(method="spearman")["reckless_calls"]
     reckless = calls[calls["call_group"].eq("reckless")]
     eligible = reckless["local_time"].dt.year.isin([2024, 2025]).sum()
+
+    # A5: counts of the boundary check, the third one spelled as a word
+    boundary = result("06_boundary_summary").iloc[0]
+    changed = boundary["beats_with_changed_rank"]
+    changed_ranks = NUMBER_WORDS.get(changed, str(changed))
     claims = [
         f"Among Berkeley’s {len(beats)} police beats in 2024–2025",
         f"more recorded collisions (Spearman ρ = {with_calls['collisions']:.3f})",
@@ -459,6 +459,10 @@ def location_claims():
         " assigned to a beat",
         "the calls–collisions correlation was still"
         f" {with_calls['alternate_collisions']:.3f}",
+        f"Of {boundary['collisions_near_two_boundaries']} collisions within one"
+        f" centimetre of two beat boundaries, {boundary['reassigned_collisions']} could"
+        " be reassigned to the other beat",
+        f"{changed_ranks.capitalize()} beats changed collision rank",
     ]
 
     # A8: how concentrated noise calls are
@@ -645,7 +649,7 @@ def test_report_has_no_number_without_a_source():
     for claim in sorted(claims, key=len, reverse=True):
         text = text.replace(claim, " ")
     left_over = {number.rstrip(",") for number in NUMBER_PATTERN.findall(text)}
-    unknown = sorted(left_over - NOT_RESULTS - NOT_SAVED_YET)
+    unknown = sorted(left_over - NOT_RESULTS)
     assert not unknown, (
         "These numbers in main.ipynb are not built from a saved result. Add a claim"
         f" for each, or list it in NOT_RESULTS with the reason: {unknown}"
