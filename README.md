@@ -21,20 +21,22 @@ Berkeley is a city built around a large university. Daily life follows the hour 
 - John Hu
 - Winny Wen
 
-## Research questions
+## Research questions and analysis
 
-The analysis has four sections. Each section answers a group of related questions.
+Our analysis is organized into four sections: context, time, academic calendar, and location. Each section answers a group of related questions, and each question has an ID used across the notebooks and the report.
 
-| Section | Question |
-|---|---|
-| Context | How have traffic stops and collisions changed over time, and do they move together? |
-| Time | At what times of day and days of the week do noise complaints, assaults, and collisions peak? |
-| Time | How do the timing patterns of calls for service and police stops differ across types of calls and stops? |
-| Time | Do traffic stops happen at the same times as collisions, and does this differ between weekdays and weekends? |
-| Academic calendar | Do noise complaints and assaults near campus follow the academic calendar (semester vs. breaks) more than in the rest of Berkeley? |
-| Academic calendar | Do noise complaints, assaults, and alcohol-related collisions increase during events like home football games, move-in week, Halloween, and finals? |
-| Location | Do areas with more reckless-driving complaints also have more collisions and more traffic stops? |
-| Location | Are noise complaints concentrated in a few blocks, and do the same blocks stay hotspots over time? |
+| Section | Question | Notebook | Datasets |
+|---|---|---|---|
+| Context | A1. How have traffic stops and collisions changed over time, and do they move together? | [`02_trends.ipynb`](notebooks/02_trends.ipynb) | Stops, collisions |
+| Time | A2. At what times of day and days of the week do noise complaints, assaults, and collisions peak? | [`03_clock.ipynb`](notebooks/03_clock.ipynb) | Calls, crime cases, collisions |
+| Time | A6. How do the timing patterns of calls for service and police stops differ across types of calls and stops? | [`03_clock.ipynb`](notebooks/03_clock.ipynb) | Calls, stops |
+| Time | A7. Do traffic stops happen at the same times as collisions, and does this differ between weekdays and weekends? | [`03_clock.ipynb`](notebooks/03_clock.ipynb) | Stops, collisions |
+| Academic calendar | A3. Do noise complaints and assaults near campus follow the academic calendar (semester vs. breaks) more than in the rest of Berkeley? | [`04_calendar.ipynb`](notebooks/04_calendar.ipynb) | Calls, crime cases |
+| Academic calendar | A4. Do noise complaints, assaults, and alcohol-related collisions increase during events like home football games, move-in week, Halloween, and finals? | [`04_calendar.ipynb`](notebooks/04_calendar.ipynb) | Calls, crime cases, collisions |
+| Location | A5. Do areas with more reckless-driving complaints also have more collisions and more traffic stops? | [`06_driving_places.ipynb`](notebooks/06_driving_places.ipynb) | Calls, collisions, stops |
+| Location | A8. Are noise complaints concentrated in a few blocks, and do the same blocks stay hotspots over time? | [`05_noise_hotspots.ipynb`](notebooks/05_noise_hotspots.ipynb) | Calls |
+
+Every notebook works with counts of recorded events. `01_data_overview.ipynb` checks table contents and time reliability first. The trends notebook correlates monthly stops and collisions (Pearson and Spearman). The clock notebook builds 24-hour share profiles, measures overlap from 0 to 1, and runs a fixed-seed permutation test with 9,999 shuffles. The calendar notebook compares Fall 2024 semester and winter break daily rates by area, plus event days with matched ordinary days. The location notebooks rank the 14 police beats with Spearman correlation and measure the share of noise calls in the busiest blocks. Each notebook saves its result tables, four of them also save figures, and `main.ipynb` reports them.
 
 ## Getting started
 
