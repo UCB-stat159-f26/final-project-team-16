@@ -15,12 +15,6 @@ This repository holds the data, code, analysis notebooks, and report for Team 16
 
 Berkeley is a city built around a large university. Daily life follows the hour of the day, the day of the week, and the academic calendar. Parties, football games, move-in, and finals change who is in town and what they do. BPD publishes its records as open data, so anyone can check if these rhythms appear. Calls for service, crime cases, and collisions describe demand: what residents report and police record. Vehicle stops describe a response officers start themselves. Comparing their timing and place shows how far enforcement lines up with reported problems. The results are descriptive summaries of recorded events. We make no claim about the effect of enforcement.
 
-## Team
-
-- Minchee Yang
-- John Hu
-- Winny Wen
-
 ## Research questions and analysis
 
 Our analysis is organized into four sections: context, time, academic calendar, and location. Each section answers a group of related questions, and each question has an ID used across the notebooks and the report.
@@ -201,3 +195,11 @@ The project website is at <https://ucb-stat159-f26.github.io/final-project-team-
 - **Data:** `make all` reads the snapshots stored in the repository and never downloads data.
 - **Kernel:** Every notebook uses the `python3` kernel, matching what `make all` and Binder use.
 - **Paths:** No file holds an absolute path, so the code runs on any computer when you start `make` and the scripts from the repository root.
+
+## Team, contributions, and reflections
+
+- Minchee Yang
+- John Hu
+- Winny Wen
+
+[`contributions.ipynb`](contributions.ipynb) describes what each member did and holds each member's personal reflections. [`CONTRIBUTING.md`](CONTRIBUTING.md) outlines how we work with issues, branches, and reviews.
