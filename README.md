@@ -214,3 +214,7 @@ The project website is at <https://ucb-stat159-f26.github.io/final-project-team-
 | Berkeley Police Department records and other third-party material | The terms of each provider |
 
 The full terms are in [`LICENSE`](LICENSE). We license code, text and media, and data separately so each type of material can be reused with credit.
+
+## References
+
+The police records come from the Berkeley Police Department Transparency Hub, and the police beat map comes from the City of Berkeley. The complete list of sources, including links and download dates, is in the References section of [`main.ipynb`](main.ipynb).
