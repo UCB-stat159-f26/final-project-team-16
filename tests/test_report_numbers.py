@@ -12,11 +12,16 @@ import re
 import pandas as pd
 import pytest
 
+from bpdtools.clock import DEFAULT_PERMUTATIONS
 from bpdtools.paths import repo_path
 
 # Text that can never be in a document. A claim uses it when the saved
 # results no longer support the wording, so that the test fails.
 NOT_SUPPORTED = "<the saved results do not support this sentence>"
+
+
+# Number words that the report spells out.
+NUMBER_WORDS = {5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten"}
 
 
 def plain_text(markdown):
@@ -75,6 +80,22 @@ def result(name):
         The table as saved by an analysis notebook.
     """
     return pd.read_csv(repo_path("results", f"{name}.csv"))
+
+
+def clock(hour):
+    """Write an hour of the day the way the report does, for example 17:00.
+
+    Parameters
+    ----------
+    hour : int
+        Hour of the day, 0 to 23.
+
+    Returns
+    -------
+    str
+        The hour as HH:00.
+    """
+    return f"{int(hour):02d}:00"
 
 
 def supported(condition, sentence):
@@ -188,10 +209,115 @@ def context_claims():
     ]
 
 
+def time_claims():
+    """Build the quoted pieces of the Time section.
+
+    Returns
+    -------
+    list of str
+        Pieces of sentences with their numbers filled in from the tables
+        that notebooks/03_clock.ipynb saves.
+    """
+    peaks = result("03_a2_peaks").set_index("events")
+    counts = result("03_a2_hour_weekday_counts")
+    a2_profiles = result("03_a2_hourly_profiles").set_index("hour")
+    a6_overlap = result("03_a6_overlap").set_index(["first", "second"])["overlap"]
+    a6_tests = result("03_a6_overlap")["p_value"].dropna()
+    a6_profiles = result("03_a6_hourly_profiles").set_index("hour")
+    a7_overlap = result("03_a7_overlap").set_index(["days", "hours"])["overlap"]
+    a7_profiles = result("03_a7_hourly_profiles").set_index("hour")
+
+    # A2: noise at night, and the peak of each event type
+    noise = counts[counts["events"].eq("Noise calls")]
+    night = noise.loc[noise["hour"].isin([22, 23, 0, 1]), "count"].sum()
+    busiest_day, busiest_time = peaks.loc["Noise calls", "busiest_cell"].split()
+    claims = [
+        f"of the {peaks.loc['Noise calls', 'n']:,} noise calls in 2021–2025,"
+        f" {night / noise['count'].sum():.0%} came between 22:00 and 01:59, and the"
+        f" busiest hour of the week was {busiest_day} at {busiest_time}",
+        f"Collisions peak at {clock(peaks.loc['Collisions', 'peak_hour'])}, whereas"
+        " assault cases",
+    ]
+
+    # A2 checks: assaults without the placeholder times, collisions by day
+    assaults = peaks.loc["Assault cases"]
+    no_midnight = peaks.loc["Assault cases without 00:00:00"]
+    no_placeholder = peaks.loc["Assault cases without 00:00:00 or 12:00:00"]
+    daytime = peaks.loc["Collisions 06:00-23:59"]
+    at_midnight = assaults["n"] - no_midnight["n"]
+    at_noon = no_midnight["n"] - no_placeholder["n"]
+    in_noon_hour = counts.loc[
+        counts["events"].eq("Assault cases") & counts["hour"].eq(12), "count"
+    ].sum()
+    afternoon = a2_profiles.loc[13:17, "Assault cases without 00:00:00 or 12:00:00"]
+    claims += [
+        f"assault cases appear to peak at {clock(assaults['peak_hour'])}, but {at_noon}"
+        f" of the {in_noon_hour} assault cases in that hour have a time of exactly"
+        " 12:00:00",
+        f"Removing the {at_midnight} assault cases at exactly 00:00:00 alone leaves the"
+        f" peak at {clock(no_midnight['peak_hour'])}"
+        f" ({no_midnight['peak_hour_share']:.1%}"
+        f" of {no_midnight['n']:,} assault cases)",
+        f"Removing both the {at_midnight} assault cases at 00:00:00 and the {at_noon}"
+        f" assault cases at 12:00:00 leaves {no_placeholder['n']:,} assault cases"
+        " without a clear peak: every hour from 13:00 to 17:00 holds between"
+        f" {afternoon.min():.1%} and {afternoon.max():.1%} of them, and"
+        f" {clock(no_placeholder['peak_hour'])} is the highest at"
+        f" {no_placeholder['peak_hour_share']:.1%}",
+        f"leaves their peak at {clock(daytime['peak_hour'])}"
+        f" ({daytime['peak_hour_share']:.1%} of {daytime['n']:,} collisions)",
+    ]
+
+    # A6: residents' calls against officer-initiated stops
+    traffic, pedestrian = "Traffic stops", "Pedestrian stops"
+    midday = a6_profiles.loc[11:16, pedestrian].sum()
+    battery_pedestrian = a6_overlap["Battery calls", pedestrian]
+    noise_pedestrian = a6_overlap["Noise calls", pedestrian]
+    stop_sources = ("CFS traffic stops 2024-2025", "Stop Data vehicle stops 2024-2025")
+    claims += [
+        f"with their highest hour at {clock(a6_profiles[traffic].idxmax())}",
+        f"They share the least timing with noise calls"
+        f" ({a6_overlap['Noise calls', traffic]:.2f})",
+        f"with {midday:.0%} happening between 11:00 and 16:59; their hourly profile is"
+        f" close to that of battery calls ({battery_pedestrian:.2f}) and far from"
+        f" that of noise calls ({noise_pedestrian:.2f})",
+        f"have almost the same hourly profile (overlap {a6_overlap[stop_sources]:.2f})",
+        f"shuffled the group labels {DEFAULT_PERMUTATIONS:,} times",
+        supported(
+            a6_tests.nunique() == 1,
+            f"Every test gave p = {a6_tests.iloc[0]}, the smallest value that"
+            f" {DEFAULT_PERMUTATIONS:,} shuffles allow",
+        ),
+        f"For each of the {NUMBER_WORDS[len(a6_tests)]} pairs, none of the"
+        f" {DEFAULT_PERMUTATIONS:,} shuffles",
+    ]
+
+    # A7: vehicle stops against collisions on weekdays and weekends
+    weekday_stops = a7_profiles["Weekdays, Vehicle stops"]
+    weekday_collisions = a7_profiles["Weekdays, Collisions"]
+    weekend_stops = a7_profiles["Weekends, Vehicle stops"]
+    late = weekend_stops.loc[19:23].sum() + weekend_stops.loc[0]
+    all_hours, daytime_hours = "00:00-23:59", "06:00-23:59"
+    claims += [
+        f"vehicle stops peak at {clock(weekday_stops.idxmax())}"
+        f" ({weekday_stops.max():.1%} of weekday stops), while collisions peak at"
+        f" {clock(weekday_collisions.idxmax())} ({weekday_collisions.max():.1%} of"
+        " weekday collisions), yet the two hourly profiles still share most of their"
+        f" timing (overlap {a7_overlap['Weekdays', all_hours]:.2f})",
+        f"On weekends the overlap falls to {a7_overlap['Weekends', all_hours]:.2f}:"
+        f" {late:.0%} of weekend stops happen between 19:00 and 00:59, whereas weekend"
+        f" collisions peak at {clock(a7_profiles['Weekends, Collisions'].idxmax())}",
+        f"the gap between weekdays ({a7_overlap['Weekdays', daytime_hours]:.2f}) and"
+        f" weekends ({a7_overlap['Weekends', daytime_hours]:.2f})",
+    ]
+    return claims
+
+
 # One group of claims per section of the report, named for the test output.
 REPORT_SECTIONS = {
     "data": data_claims,
     "context": context_claims,
+    "time": time_claims,
 }
 
 
