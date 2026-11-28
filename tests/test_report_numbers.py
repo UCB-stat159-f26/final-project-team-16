@@ -136,9 +136,62 @@ def data_claims():
     ]
 
 
+def context_claims():
+    """Build the quoted pieces of the Context section.
+
+    Returns
+    -------
+    list of str
+        Pieces of sentences with their numbers filled in from the tables
+        that notebooks/02_trends.ipynb saves.
+    """
+    summary = result("01_dataset_summary").set_index("dataset")
+    yearly = result("02_a1_yearly_totals").set_index("source")
+    monthly = result("02_a1_monthly_counts")
+    correlation = result("02_a1_correlation").set_index("measure")
+
+    def top_two(column):
+        """Give the two highest months of a column, in calendar order."""
+        top = monthly.nlargest(2, column).sort_values("month")
+        months = pd.to_datetime(top["month"])
+        names = f"{months.iloc[0]:%B} and {months.iloc[1]:%B} {months.iloc[1].year}"
+        counts = f"{top[column].iloc[0]} and {top[column].iloc[1]}"
+        return names, counts
+
+    stop_months, stop_counts = top_two("vehicle_stops")
+    collision_months, collision_counts = top_two("collisions")
+    pearson = correlation.loc["Pearson, monthly counts"]
+    ranks = correlation.loc["Spearman, monthly counts"]
+    changes = correlation.loc["Pearson, month-to-month changes"]
+    interval = f"{pearson['ci_low']:.2f} to {pearson['ci_high']:.2f}"
+    months = int(pearson["n"])
+    undated = summary.loc["Collisions", "rows_without_time"]
+    # The table stores each change as a negative percentage
+    collision_drop = -yearly.loc["collisions", "change_pct"]
+    stop_drop = -yearly.loc["vehicle_stops", "change_pct"]
+    return [
+        f"the {undated} collisions without a date",
+        f"Collisions fell by {collision_drop:.1f}%, about twice as much as vehicle"
+        f" stops ({stop_drop:.1f}%)",
+        f"Stops were highest in {stop_months} ({stop_counts}), whereas collisions were"
+        f" highest in {collision_months} ({collision_counts})",
+        f"Across the {months} months, the correlation between monthly stops and"
+        f" monthly collisions is close to zero (Pearson r = {pearson['r']:.2f}, 95%"
+        f" interval {interval})",
+        f"the correlation of the ranks is {ranks['r']:.2f}",
+        f"that both series could share, is {changes['r']:.2f}",
+        f"give only {months} monthly pairs, so the 95% interval runs from {interval}",
+        supported(
+            monthly[["vehicle_stops", "collisions"]].min().min() > 0,
+            "No month in 2024–2025 has a count of 0",
+        ),
+    ]
+
+
 # One group of claims per section of the report, named for the test output.
 REPORT_SECTIONS = {
     "data": data_claims,
+    "context": context_claims,
 }
 
 
