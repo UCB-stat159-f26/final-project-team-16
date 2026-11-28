@@ -161,3 +161,31 @@ make lint
 ## Automation
 
 Two GitHub Actions workflows in `.github/workflows/` run automatically. On every pull request and every push to `main`, `tests.yml` runs ruff checks and unit tests, and the badge at the top of this README shows its latest result. On every push to `main`, `deploy.yml` builds the website and publishes it to GitHub Pages. Locally, `make all` reruns the whole analysis in one command.
+
+## The `bpdtools` package
+
+Reusable steps live in the `bpdtools` package as functions with NumPy-style docstrings, which the notebooks and scripts import. Running `make env` installs the package, letting `import bpdtools` work from any folder.
+
+| Module | Functions | Purpose |
+|---|---|---|
+| `load.py` | `load_calls`, `load_cases`, `classify_call_type`, `read_text_table` | Read the calls and crime case tables with local times |
+| `traffic.py` | `load_stops`, `load_collisions` | Read the vehicle stop and collision tables |
+| `timeparts.py` | `add_time_parts` | Add the local hour, weekday, month, and a weekend flag |
+| `clock.py` | `timed_hours`, `hour_weekday_table`, `hourly_profile`, `profile_overlap`, `overlap_permutation_test` | Count events by hour and weekday and compare two hour profiles |
+| `trends.py` | `monthly_counts` | Count events in each calendar month |
+| `calendar_rates.py` | `period_rates` | Compare semester and winter-break event rates |
+| `hotspots.py` | `block_counts`, `top_share`, `yearly_top_overlap` | Count calls per block and measure how concentrated they are |
+| `sectors.py` | `normalize_block_address`, `assign_sectors`, `attach_address_sectors`, and five more | Place addresses, calls, and crime cases in police beats |
+| `plots.py` | `set_plot_style`, `plot_hour_weekday_heatmap`, `plot_hourly_profiles` | Shared figure style and the hour and weekday plots |
+| `paths.py` | `repo_path` | Build file paths from the repository root |
+| `config.py` | constants only | Random seed, time zone, analysis window, and call type groups |
+| `calls.py`, `crime.py`, `download.py`, `files.py` | 16 functions | Helpers for the scripts that download and clean the data |
+
+```python
+from bpdtools.clock import hourly_profile
+from bpdtools.load import load_calls
+
+# Share of calls in each hour of the day, one column per call group
+calls = load_calls()
+profile = hourly_profile(calls, time_column="local_time", group_column="call_group")
+```
