@@ -5,11 +5,15 @@
 
 When and where do problems arise in Berkeley, and does police enforcement follow them?
 
-This repository holds the final project of Team 16 for STAT 159 at UC Berkeley, Fall 2026. The project uses open data from the [Berkeley Police Department Transparency Hub](https://bpd-transparency-initiative-berkeleypd.hub.arcgis.com/search).
+This repository holds the data, code, analysis notebooks, and report for Team 16's STAT 159 final project at UC Berkeley, Fall 2026. We use four open datasets from the [Berkeley Police Department (BPD) Transparency Hub](https://bpd-transparency-initiative-berkeleypd.hub.arcgis.com/search): calls for service, crime cases, traffic collisions, and vehicle stops. We describe when and where noise complaints, assaults, collisions, and reckless-driving complaints are recorded and compare them with vehicle stops.
 
-The project website at <https://ucb-stat159-f26.github.io/final-project-team-16/> contains the main report and every analysis notebook.
+- **Website:** <https://ucb-stat159-f26.github.io/final-project-team-16/> has the main report and every analysis notebook.
+- **Main report:** [`main.ipynb`](main.ipynb) summarizes and discusses the results.
+- **Run it online:** the Binder badge above opens `main.ipynb` in JupyterLab with nothing to install. Binder builds the `bpd-rhythm` environment from `environment.yml`, and the first start can take several minutes.
 
-The Binder badge at the top of the README runs the notebooks online without installing anything. Binder builds the `bpd-rhythm` environment from `environment.yml` and opens `main.ipynb` in JupyterLab, and the first start can take several minutes.
+## Motivation
+
+Berkeley is a city built around a large university. Daily life follows the hour of the day, the day of the week, and the academic calendar. Parties, football games, move-in, and finals change who is in town and what they do. BPD publishes its records as open data, so anyone can check if these rhythms appear. Calls for service, crime cases, and collisions describe demand: what residents report and police record. Vehicle stops describe a response officers start themselves. Comparing their timing and place shows how far enforcement lines up with reported problems. The results are descriptive summaries of recorded events. We make no claim about the effect of enforcement.
 
 ## Team
 
