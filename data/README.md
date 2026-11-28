@@ -60,3 +60,9 @@ rather than 957 flags across the snapshot. Neither addition falls in Fall
 
 Sources: [California AB 2687, chaptered text](https://www.leginfo.ca.gov/pub/15-16/bill/asm/ab_2651-2700/ab_2687_bill_20160928_chaptered.pdf)
 and [CHP subsection history](https://www.chp.ca.gov/siteassets/files/idtf-trd-12-11-2019-dui-subsection-changes-history.pdf).
+
+## Stop, collision and calendar codebooks
+
+- [Vehicle stops](codebooks/vehicle_stops.md)
+- [Collisions](codebooks/collisions.md)
+- [Academic and event calendar](codebooks/calendar.md)
