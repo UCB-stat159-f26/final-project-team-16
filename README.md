@@ -59,7 +59,7 @@ All four datasets come from the BPD Transparency Hub. We store a snapshot of eac
 - **Raw files:** The raw Calls for Service file (about 58 MB) and the raw crime file (about 30 MB) change every day at the source, so we store the 2021 to 2025 tables built from them as compressed CSV files. Running `make data` downloads fresh raw files into `data/downloads/` and rebuilds the tables, so the rebuilt tables can differ from the stored snapshot.
 - **Additional sources:** Police beat polygons from the City of Berkeley live in `data/boundaries/`. Fall 2024 semester, break, and event dates live in `data/calendar/`, each with a link to its source.
 - **Documentation:** [`data/README.md`](data/README.md) lists the sources, snapshot dates, checksums, and counting rules for stops and collisions. The codebooks in [`data/codebooks/`](data/codebooks) explain each column of the calls, crime cases, collisions, vehicle stops, calendar, and address lookup tables.
-- **Counting rules:** Raw stops can list multiple people and raw crime cases can list multiple statutes, so our prepared tables keep one row per stop and per case. All times are local time in the `America/Los_Angeles` time zone.
+- **Counting rules:** Raw stops can list multiple people and raw crime cases can list multiple statutes, so our prepared tables keep one row per stop and per case. The analyses use Berkeley local dates and times in the `America/Los_Angeles` time zone. In `collisions.csv`, use `Date` and `Time` for local comparisons, because `DateTime` is UTC.
 
 ## Repository structure
 
