@@ -82,6 +82,22 @@ def result(name):
     return pd.read_csv(repo_path("results", f"{name}.csv"))
 
 
+def processed(name):
+    """Read one small analysis table from data/processed/.
+
+    Parameters
+    ----------
+    name : str
+        File name inside data/processed/, without the .csv ending.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The table as saved by an analysis notebook.
+    """
+    return pd.read_csv(repo_path("data", "processed", f"{name}.csv"))
+
+
 def clock(hour):
     """Write an hour of the day the way the report does, for example 17:00.
 
@@ -313,11 +329,57 @@ def time_claims():
     return claims
 
 
+def calendar_claims():
+    """Build the quoted pieces of the Academic calendar section.
+
+    Returns
+    -------
+    list of str
+        Pieces of sentences with their numbers filled in from the tables
+        that notebooks/04_calendar.ipynb saves in data/processed/.
+    """
+    rates = processed("a3_period_rates").set_index(
+        ["outcome", "definition", "area", "period"]
+    )
+    no_beat = processed("a3_unassigned").set_index(["outcome", "period"])["unassigned"]
+    matches = processed("a4_noise_matches")
+
+    def ratio(outcome, definition, area):
+        """Give the semester to break rate ratio of one group, two decimals."""
+        row = rates.loc[(outcome, definition, area, "semester")]
+        return f"{row['semester_to_break_ratio']:.2f}"
+
+    semester = rates.loc[("noise", "southside", "near", "semester")]
+    winter = rates.loc[("noise", "southside", "near", "winter_break")]
+    # Event dates that found no ordinary date to compare with
+    unmatched = pd.to_datetime(matches.loc[matches["n_controls"].eq(0), "event_date"])
+    unmatched_days = " and ".join(f"{day:%B} {day.day}" for day in sorted(unmatched))
+    return [
+        f"noise calls in Southside averaged {semester['daily_rate']:.2f} per day during"
+        f" the semester and {winter['daily_rate']:.2f} during winter break",
+        f"The semester rate was {ratio('noise', 'southside', 'near')} times the break"
+        f" rate there and {ratio('noise', 'southside', 'other')} times the break rate"
+        " in the other",
+        f"The comparison uses {int(semester['covered_days'])} semester days and"
+        f" {int(winter['covered_days'])} break days",
+        "the larger semester increase in noise calls"
+        f" ({ratio('noise', 'adjacent', 'near')}"
+        f" versus {ratio('noise', 'adjacent', 'other')} elsewhere)",
+        f"reversed the ordering ({ratio('assault', 'adjacent', 'near')} versus"
+        f" {ratio('assault', 'adjacent', 'other')})",
+        f"excluded {no_beat['noise', 'semester']} noise calls and"
+        f" {no_beat['assault', 'semester']} assault cases with no beat during the"
+        " semester",
+        f"{unmatched_days} had no eligible comparison",
+    ]
+
+
 # One group of claims per section of the report, named for the test output.
 REPORT_SECTIONS = {
     "data": data_claims,
     "context": context_claims,
     "time": time_claims,
+    "calendar": calendar_claims,
 }
 
 
