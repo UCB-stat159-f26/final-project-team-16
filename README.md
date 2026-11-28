@@ -157,3 +157,7 @@ make lint
 ```
 
 `make lint` runs `ruff check .` and then `ruff format --check .` inside the `bpd-rhythm` environment. The first command checks code style, import order, names, and docstrings in the NumPy style. The second command lists the files that `ruff format` would change. Both commands read their settings from `pyproject.toml` and also check the notebooks. To format a file, run `ruff format <file>` in the activated environment.
+
+## Automation
+
+Two GitHub Actions workflows in `.github/workflows/` run automatically. On every pull request and every push to `main`, `tests.yml` runs ruff checks and unit tests, and the badge at the top of this README shows its latest result. On every push to `main`, `deploy.yml` builds the website and publishes it to GitHub Pages. Locally, `make all` reruns the whole analysis in one command.
