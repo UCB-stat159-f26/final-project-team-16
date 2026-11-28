@@ -1,9 +1,9 @@
 """Check the numbers quoted in the report text against the saved results.
 
-The report quotes results in plain sentences. Each test here builds the
-quoted piece of a sentence again from the saved result tables and looks for
-it in the text, so a rerun that changes a result fails the test until the
-sentence is updated.
+The report and the home page quote results in plain sentences. Each test
+here builds the quoted piece of a sentence again from the saved result
+tables and looks for it in the text, so a rerun that changes a result fails
+the test until the sentence is updated.
 """
 
 import json
@@ -54,6 +54,10 @@ NOT_RESULTS = {
 }  # fmt: skip
 
 
+# Numbers of the home page that are names: the course, the team, and the term.
+HOME_NOT_RESULTS = {"159", "16", "2026"}
+
+
 # Numbers that no saved table holds yet. They come from the boundary check
 # in notebooks/06_driving_places.ipynb, which prints them without saving.
 NOT_SAVED_YET = {"59", "58"}
@@ -99,6 +103,23 @@ def report_text():
         if cell["cell_type"] == "markdown" and cell["id"] != "report-references"
     ]
     return plain_text("\n".join(prose))
+
+
+def home_text():
+    """Read the prose of the website home page.
+
+    Returns
+    -------
+    str
+        The plain text of index.md without its front matter and without
+        the lines that open, close, or set options of a MyST directive.
+    """
+    with open(repo_path("index.md"), encoding="utf-8") as source:
+        lines = source.read().splitlines()
+    # The front matter sits between the first two lines of three dashes
+    body = lines[lines.index("---", 1) + 1 :]
+    # Directive fences and their options start with a colon
+    return plain_text("\n".join(line for line in body if not line.startswith(":")))
 
 
 def result(name):
@@ -553,6 +574,46 @@ def conclusion_claims():
     ]
 
 
+def home_claims():
+    """Build the quoted pieces of the website home page.
+
+    Returns
+    -------
+    list of str
+        The four record counts with their date ranges, and the sentences
+        about the hour of day, filled in from the saved tables.
+    """
+    summary = result("01_dataset_summary").set_index("dataset")
+    peaks = result("03_a2_peaks").set_index("events")
+    counts = result("03_a2_hour_weekday_counts")
+
+    def tile(dataset, label, date_format):
+        """Write one count with its first and last date, as the page shows it."""
+        row = summary.loc[dataset]
+        first = pd.Timestamp(row["first_local_date"])
+        last = pd.Timestamp(row["last_local_date"])
+        return f"{row['rows']:,} {label}, {first:{date_format}} to {last:{date_format}}"
+
+    no_midnight = peaks.loc["Assault cases without 00:00:00"]
+    no_placeholder = peaks.loc["Assault cases without 00:00:00 or 12:00:00"]
+    in_noon_hour = counts.loc[
+        counts["events"].eq("Assault cases") & counts["hour"].eq(12), "count"
+    ].sum()
+    return [
+        tile("Calls for Service", "calls for service", "%Y"),
+        tile("Crime cases", "crime cases", "%Y"),
+        tile("Collisions", "collisions", "%b %Y"),
+        tile("Vehicle stops", "vehicle stops", "%b %Y"),
+        f"Noise calls peak at {clock(peaks.loc['Noise calls', 'peak_hour'])}, when"
+        f" {peaks.loc['Noise calls', 'peak_hour_share']:.1%} of them come in, and"
+        f" collisions peak at {clock(peaks.loc['Collisions', 'peak_hour'])}",
+        f"but {no_midnight['n'] - no_placeholder['n']} of the {in_noon_hour} cases in"
+        " that hour were logged at exactly 12:00:00",
+        f"and {clock(no_placeholder['peak_hour'])} is the highest hour at"
+        f" {no_placeholder['peak_hour_share']:.1%}",
+    ]
+
+
 # One group of claims per section of the report, named for the test output.
 REPORT_SECTIONS = {
     "data": data_claims,
@@ -588,4 +649,27 @@ def test_report_has_no_number_without_a_source():
     assert not unknown, (
         "These numbers in main.ipynb are not built from a saved result. Add a claim"
         f" for each, or list it in NOT_RESULTS with the reason: {unknown}"
+    )
+
+
+def test_home_page_quotes_the_saved_results():
+    """Check that each quoted piece of the home page is in index.md."""
+    text = home_text()
+    missing = [claim for claim in home_claims() if claim not in text]
+    assert not missing, (
+        "The saved results give these pieces, but index.md does not contain them."
+        " Update the home page:\n" + "\n".join(missing)
+    )
+
+
+def test_home_page_has_no_number_without_a_source():
+    """Check that every number on the home page is part of a checked claim."""
+    text = home_text()
+    for claim in sorted(home_claims(), key=len, reverse=True):
+        text = text.replace(claim, " ")
+    left_over = {number.rstrip(",") for number in NUMBER_PATTERN.findall(text)}
+    unknown = sorted(left_over - NOT_RESULTS - HOME_NOT_RESULTS)
+    assert not unknown, (
+        "These numbers in index.md are not built from a saved result. Add a claim"
+        f" for each, or list it in HOME_NOT_RESULTS with the reason: {unknown}"
     )
