@@ -27,6 +27,38 @@ NOT_SUPPORTED = "<the saved results do not support this sentence>"
 NUMBER_WORDS = {5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten"}
 
 
+# A number in running text: a clock time, or digits with optional thousands
+# commas, decimals, a minus sign, and a percent sign.
+NUMBER_PATTERN = re.compile(
+    r"\d{1,2}:\d{2}(?::\d{2})?|(?<![\w.])-?\d[\d,]*(?:\.\d+)?%?"
+)
+
+
+# Numbers in the report that are settings or names, not results, with the
+# reason for each group. Every other number must be part of a checked claim.
+NOT_RESULTS = {
+    # Years and the analysis window
+    "2007", "2021", "2022", "2024", "2025",
+    # Clock limits of the checks and the placeholder times
+    "00:00", "00:59", "01:59", "05:59", "06:00", "23:59", "00:00:00", "12:00:00",
+    # The emergency phone number
+    "911",
+    # Hours in a day, and the two ends of the overlap scale
+    "24", "1", "0",
+    # Confidence level of the interval
+    "95%",
+    # Street number of a block that the text names
+    "2700",
+    # Police beat numbers and sizes of the top lists
+    "6", "7", "4", "20", "10", "50",
+}  # fmt: skip
+
+
+# Numbers that no saved table holds yet. They come from the boundary check
+# in notebooks/06_driving_places.ipynb, which prints them without saving.
+NOT_SAVED_YET = {"59", "58"}
+
+
 def plain_text(markdown):
     """Reduce Markdown to the words a reader sees, on one line.
 
@@ -540,4 +572,20 @@ def test_report_quotes_the_saved_results(section):
     assert not missing, (
         "The saved results give these pieces, but main.ipynb does not contain them."
         " Update the sentences of the report:\n" + "\n".join(missing)
+    )
+
+
+def test_report_has_no_number_without_a_source():
+    """Check that every number in the report prose is part of a checked claim."""
+    text = report_text()
+    # Take the checked pieces out, longest first, so that only numbers that
+    # no claim covers are left
+    claims = [claim for build in REPORT_SECTIONS.values() for claim in build()]
+    for claim in sorted(claims, key=len, reverse=True):
+        text = text.replace(claim, " ")
+    left_over = {number.rstrip(",") for number in NUMBER_PATTERN.findall(text)}
+    unknown = sorted(left_over - NOT_RESULTS - NOT_SAVED_YET)
+    assert not unknown, (
+        "These numbers in main.ipynb are not built from a saved result. Add a claim"
+        f" for each, or list it in NOT_RESULTS with the reason: {unknown}"
     )
